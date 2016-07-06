@@ -1,0 +1,4 @@
+include ':atableview'
+project(':atableview').projectDir = new File('pttn-and/atableview')
+include ':pttn-and'
+project(':pttn-and').projectDir = new File('pttn-and')

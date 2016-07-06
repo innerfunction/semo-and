@@ -1,0 +1,3 @@
+[submodule "pttn-and"]
+	path = pttn-and
+	url = git@github.com:innerfunction/pttn-and.git
