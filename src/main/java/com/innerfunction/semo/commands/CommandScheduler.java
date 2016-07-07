@@ -70,7 +70,7 @@ public class CommandScheduler {
     private boolean deleteExecutedQueueRecords = true;
 
     /** An object representing a command item on the execution queue. */
-    static class CommandItem {
+    public static class CommandItem {
         /** The ID of the command's DB record. */
         String rowID;
         /** The command name. */
@@ -92,6 +92,11 @@ public class CommandScheduler {
             catch(org.json.simple.parser.ParseException e) {
                 Log.e(Tag, "Parsing JSON args", e );
             }
+        }
+        /** Instantiate a new command item with a command name and list of arguments. */
+        public CommandItem(String name, Object... args) {
+            this.name = name;
+            this.args = Arrays.asList( args );
         }
     }
 
@@ -160,7 +165,7 @@ public class CommandScheduler {
             @Override
             public void run() {
                 // NOTE performQuery(String sql, Object... params);
-                List<Map<String,?>> queueItems = db.performQuery("SELECT * FROM queue WHERE status='P' ORDER BY batch, id ASC");
+                List<Map<String,Object>> queueItems = db.performQuery("SELECT * FROM queue WHERE status='P' ORDER BY batch, id ASC");
                 execQueue = new ArrayList<>();
                 for( Map<String,?> queueItem : queueItems ) {
                     execQueue.add( new CommandItem( queueItem ) );
@@ -283,19 +288,13 @@ public class CommandScheduler {
                     return;
                 }
                 command.execute( commandItem.name, commandItem.args )
-                    .then( new Q.Promise.Callback<List<Command>, Object>() {
-                        public Object result(final List<Command> commands) {
+                    .then( new Q.Promise.Callback<List<CommandItem>, Object>() {
+                        public Object result(final List<CommandItem> commands) {
                             ExecRunQueue.dispatch( new Runnable() {
                                 public void run() {
                                     // Queue any new commands, delete current command from db.
                                     db.beginTransaction();
-                                    for( Object item : commands ) {
-                                        CommandItem command = parseCommandItem( item );
-                                        if( command == null ) {
-                                            // Indicates an unparseable command line string; just
-                                            // continue to the next command.
-                                            continue;
-                                        }
+                                    for( CommandItem command : commands ) {
                                         // Check for system commands.
                                         if("control.purge-queue".equals( command.name ) ) {
                                             purgeQueue();

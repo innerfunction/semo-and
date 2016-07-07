@@ -116,65 +116,65 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.packagedContentPath = "";
         this.uriSchemeName = "wp";
         this.wpRealm = "semo";
-        this.listFormats = $( $("table", new WPDataTableFormatter() ) );
-        this.postFormats = $( $("webview", WPDataWebviewFormatter() ) );
+        this.listFormats = l( l("table", new WPDataTableFormatter() ) );
+        this.postFormats = l( l("webview", WPDataWebviewFormatter() ) );
         this.postURITemplate = "{uriSchemeName}:/post/{postID}";
 
         // Configuration template. Note that the top-level property types are inferred from the
         // corresponding properties on the container object (i.e. self).
-        Map<String,Object> template = $(
-            _("postDB", $(
-                _("name",           "$postDBName"),
-                _("version",        1),
-                _("resetDatabase",  true),
+        Map<String,Object> template = m(
+            kv("postDB", m(
+                kv("name",           "$postDBName"),
+                kv("version",        1),
+                kv("resetDatabase",  true),
                 // Table of wordpress posts.
-                _("tables", $(
-                    _( "posts", $(
-                        _( "columns", $(
-                            _( "id", $( _( "type", "INTEGER" ), _( "tag", "id" ) ) ), // Post ID
-                            _( "title", $( _( "type", "TEXT" ) ) ),
-                            _( "type", $( _( "type", "TEXT" ) ) ),
-                            _( "status", $( _( "type", "TEXT" ) ) ),      // i.e. WP post status
-                            _( "modified", $( _( "type", "TEXT" ) ) ),      // Modification date/time; ISO 8601 format string.
-                            _( "content", $( _( "type", "TEXT" ) ) ),
-                            _( "imageid", $( _( "type", "INTEGER" ) ) ),   // ID of the post's featured image.
-                            _( "location", $( _( "type", "STRING" ) ) ),    // The post's location; packaged, downloaded or server.
-                            _( "url", $( _( "type", "STRING" ) ) ),    // The post's WP URL.
-                            _( "filename", $( _( "type", "TEXT" ) ) ),      // Name of associated media file (i.e. for attachments)
-                            _( "parent", $( _( "type", "INTEGER" ) ) ),   // ID of parent page/post.
-                            _( "menu_order", $( _( "type", "INTEGER" ) ) )    // Sort order; mapped to post.menu_order.
+                kv("tables", m(
+                    kv( "posts", m(
+                        kv( "columns", m(
+                            kv( "id", m( kv( "type", "INTEGER" ), kv( "tag", "id" ) ) ), // Post ID
+                            kv( "title", m( kv( "type", "TEXT" ) ) ),
+                            kv( "type", m( kv( "type", "TEXT" ) ) ),
+                            kv( "status", m( kv( "type", "TEXT" ) ) ),      // i.e. WP post status
+                            kv( "modified", m( kv( "type", "TEXT" ) ) ),      // Modification date/time; ISO 8601 format string.
+                            kv( "content", m( kv( "type", "TEXT" ) ) ),
+                            kv( "imageid", m( kv( "type", "INTEGER" ) ) ),   // ID of the post's featured image.
+                            kv( "location", m( kv( "type", "STRING" ) ) ),    // The post's location; packaged, downloaded or server.
+                            kv( "url", m( kv( "type", "STRING" ) ) ),    // The post's WP URL.
+                            kv( "filename", m( kv( "type", "TEXT" ) ) ),      // Name of associated media file (i.e. for attachments)
+                            kv( "parent", m( kv( "type", "INTEGER" ) ) ),   // ID of parent page/post.
+                            kv( "menu_order", m( kv( "type", "INTEGER" ) ) )    // Sort order; mapped to post.menu_order.
                         ) )
                     ) ),
                     // Table of parent/child post closures. Used to efficiently map descendant post relationships.
                     // See http://dirtsimple.org/2010/11/simplest-way-to-do-tree-based-queries.html for a simple description.
-                    _( "closures", $(
-                        _( "columns", $(
-                            _( "parent", $( _( "type", "INTEGER" ) ) ),
-                            _( "child", $( _( "type", "INTEGER" ) ) ),
-                            _( "depth", $( _( "type", "INTEGER" ) ) )
+                    kv( "closures", m(
+                        kv( "columns", m(
+                            kv( "parent", m( kv( "type", "INTEGER" ) ) ),
+                            kv( "child", m( kv( "type", "INTEGER" ) ) ),
+                            kv( "depth", m( kv( "type", "INTEGER" ) ) )
                         ) )
                     ) )
                 ))
             )),
-            _("contentProtocol", $(
-                _("feedURL",                "$feedURL"),
-                _("postDB",                 "@named:postDB"),
-                _("stagingPath",            "$stagingPath"),
-                _("packagedContentPath",    "$packagedContentPath"),
-                _("baseContentPath",        "$baseContentPath"),
-                _("contentPath",            "$contentPath")
+            kv("contentProtocol", m(
+                kv("feedURL",                "$feedURL"),
+                kv("postDB",                 "@named:postDB"),
+                kv("stagingPath",            "$stagingPath"),
+                kv("packagedContentPath",    "$packagedContentPath"),
+                kv("baseContentPath",        "$baseContentPath"),
+                kv("contentPath",            "$contentPath")
             )),
-            _("clientTemplateContext", $(
-                _("*ios-class",             "IFWPClientTemplateContext"),
-                _("ext", $(
-                    _("childPosts", $(
-                        _("*ios-class",     "IFWPChildPostRendering")
+            kv("clientTemplateContext", m(
+                kv("*ios-class",             "IFWPClientTemplateContext"),
+                kv("ext", m(
+                    kv("childPosts", m(
+                        kv("*ios-class",     "IFWPChildPostRendering")
                     ))
                 ))
             )),
-            _("packagedContentPath",        "$packagedContentPath"),
-            _("contentPath",                "$contentPath"),
-            _("commandScheduler",           $( _("*and-class", "com.innerfunction.semo.commands.CommandScheduler")))
+            kv("packagedContentPath",        "$packagedContentPath"),
+            kv("contentPath",                "$contentPath"),
+            kv("commandScheduler",           m( kv("*and-class", "com.innerfunction.semo.commands.CommandScheduler")))
         );
         this.configTemplate = new Configuration( template );
 
@@ -218,7 +218,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     /** Generate a URI to reference the post with the specified ID. */
     public String makeURIForPostWithID(String postID) {
-        Map<String,Object> context = $( _( "uriSchemeName", uriSchemeName ), _( "postID", postID ) );
+        Map<String,Object> context = m( kv( "uriSchemeName", uriSchemeName ), kv( "postID", postID ) );
         return StringTemplate.render( postURITemplate, context );
     }
 
@@ -235,7 +235,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Check for child type relations for this post type.
         Object childTypes = postTypeRelations.get( postType );
         if( childTypes != null ) {
-            params.putAll( $( _("type", childTypes ) );
+            params.putAll( m( kv("type", childTypes ) );
         }
         params.put("parent", postID );
         // Create the query.
@@ -291,7 +291,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             }
         }
         // Assume at this point that the template file exists.
-        String template = Files.readString( templatePath, "UTF-8");
+        String template = Files.readString( templatePath );
         // Generate the full post HTML using the post data and the client template.
         Object context = clientTemplateContext.makeTemplateContextForPostData( postData );
         // Render the post template
@@ -307,7 +307,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     }
 
     /** Query the post database using a predefined filter. */
-    public Object queryPostsUsingFilter(String filterName, Map<String,String> params) {
+    public Object queryPostsUsingFilter(String filterName, Map<String,Object> params) {
         Object postData = null;
         if( filterName != null ) {
             DBFilter filter = filters.get( filterName );
@@ -485,16 +485,16 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         String packagedContentPath = [MainBundlePath stringByAppendingPathComponent:_packagedContentPath];
 
         // Setup configuration parameters.
-        Map<String,Object> parameters = $(
-            _("postDBName",             postDBName),
-            _("resetPostDB",            resetPostDB),
-            _("feedURL",                feedURL),
-            _("stagingPath",            stagingPath),
-            _("packagedContentPath",    packagedContentPath),
-            _("baseContentPath",        baseContentPath),
-            _("contentPath",            contentPath),
-            _("listFormats",            listFormats),
-            _("postFormats",            postFormats)
+        Map<String,Object> parameters = m(
+            kv("postDBName",             postDBName),
+            kv("resetPostDB",            resetPostDB),
+            kv("feedURL",                feedURL),
+            kv("stagingPath",            stagingPath),
+            kv("packagedContentPath",    packagedContentPath),
+            kv("baseContentPath",        baseContentPath),
+            kv("contentPath",            contentPath),
+            kv("listFormats",            listFormats),
+            kv("postFormats",            postFormats)
         );
 
         // TODO: There should be some standard method for doing the following, but need to consider what

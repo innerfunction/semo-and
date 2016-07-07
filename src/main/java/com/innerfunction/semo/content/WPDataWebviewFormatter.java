@@ -11,25 +11,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License
-package com.innerfunction.semo.commands;
+package com.innerfunction.semo.content;
 
-import com.innerfunction.q.Q;
+import java.util.Map;
 
-import java.util.List;
-import static com.innerfunction.semo.commands.CommandScheduler.CommandItem;
+import static com.innerfunction.util.DataLiterals.*;
 
 /**
- * A schedulable command.
- *
- * Created by juliangoacher on 07/05/16.
+ * Created by juliangoacher on 07/07/16.
  */
-public interface Command {
+public class WPDataWebviewFormatter implements DataFormatter {
 
-    /**
-     * Execute the command with the specified name and arguments.
-     * Returns a deferred promise which may resolve to an array of new commands to
-     * be queued for execution after the current, and any other commands, complete.
-     */
-    Q.Promise<List<CommandItem>> execute(String name, List args);
-
+    @Override
+    public Object formatData(Object data) {
+        Map<String,Object> _data = (Map<String,Object>)data;
+        return m(
+            kv("contentURL", _data.get("contentURL")),
+            kv("content",    _data.get("postHTML"))
+        );
+    }
 }

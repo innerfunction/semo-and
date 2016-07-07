@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.innerfunction.semo.commands.CommandScheduler.CommandItem;
+
 /**
  * A command protocol.
  * A command implementation that supports multiple different named commands, useful for
@@ -46,7 +48,7 @@ public class CommandProtocol implements Command {
      * Arguments can be defined by position, or by using named switches (e.g. -name value).
      * The names of positional arguments are specified using the argOrder list.
      */
-    public Map<String,?> parseArgs(List<String> args, String[] argOrder, Map<String,String> defaults) {
+    public Map<String,Object> parseArgs(List<String> args, String[] argOrder, Map<String,Object> defaults) {
         Map<String,Object> result = new HashMap<>();
         String name = null;
         Object value = null;
@@ -86,7 +88,7 @@ public class CommandProtocol implements Command {
     }
 
     @Override
-    public Q.Promise<List<Command>> execute(String name, List args) {
+    public Q.Promise<List<CommandItem>> execute(String name, List args) {
         // Split the protocol prefix from the name to get the actual command name.
         String[] nameParts = name.split("\\.");
         //commandPrefix = nameParts[0]; // TODO Is this correct? Why set it here...?
