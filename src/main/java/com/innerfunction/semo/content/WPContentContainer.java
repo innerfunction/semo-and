@@ -587,6 +587,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.feedURL = url;
     }
 
+    public String getFeedURL() {
+        return feedURL;
+    }
+
     public void setPackagedContentPath(String path) {
         this.packagedContentPath = path;
     }
@@ -605,6 +609,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     public void setWPRealm(String realm) {
         this.wpRealm = realm;
+    }
+
+    public String getWPRealm() {
+        return wpRealm;
     }
 
     public void setShowLoginAction(String action) {
@@ -665,6 +673,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     public void setHTTPClient(HTTPClient client) {
         this.httpClient = client;
+    }
+
+    public HTTPClient getHTTPClient() {
+        return httpClient;
     }
 
     public void setSearchResultLimit(int limit) {

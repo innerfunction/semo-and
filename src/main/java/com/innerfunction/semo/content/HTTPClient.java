@@ -22,7 +22,21 @@ import java.util.Map;
  */
 public class HTTPClient {
 
-    static class Response {}
+    /** A HTTP response. */
+    static class Response {
+
+        public String getRequestURL() {
+            return null;
+        }
+
+        public int getStatusCode() {
+            return 0;
+        }
+
+        public Map<String,Object> parseData() {
+            return null;
+        }
+    }
 
     /** A wrapper for a discrete HTTP action. */
     interface Action {
@@ -47,26 +61,38 @@ public class HTTPClient {
     }
 
     public Q.Promise<Response> get(String url) {
-        return null;
+        return get( url, null );
     }
 
-    public Q.Promise<Response> get(String url, Map<String,Object> data) {
-        return null;
+    public Q.Promise<Response> get(final String url, final Map<String,Object> data) {
+        return submit(new Action() {
+            @Override
+            public Q.Promise<Response> submit() {
+                return null;
+            }
+        });
     }
 
-    public Q.Promise<Response> getFile(String url) {
-        return null;
+    public Q.Promise<Response> getFile(final String url) {
+        return submit(new Action() {
+            @Override
+            public Q.Promise<Response> submit() {
+                return null;
+            }
+        });
     }
 
-    public Q.Promise<Response> post(String url, Map<String,Object> data) {
-
+    public Q.Promise<Response> post(final String url, final Map<String,Object> data) {
+        return submit(new Action() {
+            @Override
+            public Q.Promise<Response> submit() {
+                return null;
+            }
+        });
     }
 
     public Q.Promise<Response> submit(String method, String url, Map<String,Object> data) {
-        if( "POST".equals( method ) ) {
-            return post( url, data );
-        }
-        return get( url, data );
+        return "POST".equals( method ) ? post( url, data ) : get( url, data );
     }
 
     private boolean isAuthenticationErrorResponse(Response response) {

@@ -20,8 +20,10 @@ import com.innerfunction.q.Q;
 import com.innerfunction.util.KeyPath;
 import com.innerfunction.util.Null;
 import com.innerfunction.util.Paths;
+import com.innerfunction.util.UserDefaults;
 
 import static com.innerfunction.util.DataLiterals.*;
+import static com.innerfunction.semo.content.HTTPClient.Response;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,12 +41,14 @@ public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
     private String wpRealm;
     private String feedURL;
     private List<String> profileFieldNames;
+    private UserDefaults userDefaults;
 
     public WPAuthManager(WPContentContainer container) {
         this.container = container;
         this.wpRealm = container.getWPRealm();
         this.feedURL = container.getFeedURL();
         this.profileFieldNames = Arrays.asList("ID", "first_name", "last_name", "user_email");
+        this.userDefaults = AppContainer.getAppContainer().getUserDefaults();
     }
 
     public String getLoginURL() {
@@ -158,18 +162,17 @@ public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
         // Fetch the password reminder URL from the server.
         String url = Paths.join(feedURL, "account/password-reminder");
         container.getHTTPClient().get(url)
-            .then(xxx);
-        /*
-        .then((id)^(IFHTTPClientResponse *response) {
-            id data = [response parseData];
-            NSString *reminderURL = data[@"lost_password_url"];
-            if (reminderURL) {
-                // Open the URL in the device browser.
-                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:reminderURL]];
-            }
-            return nil;
-        });
-        */
+            .then( new Q.Promise.Callback<Response,Response>() {
+                public Response result(Response response) {
+                    Map<String,Object> data = response.parseData();
+                    String reminderURL = KeyPath.getValueAsString("lost_password_url", data );
+                    if( reminderURL != null ) {
+                        // Open the URL in the device browser.
+                        AppContainer.getAppContainer().openURL( reminderURL );
+                    }
+                    return response;
+                }
+            });
     }
 
     private void handleReauthenticationFailure() {
@@ -179,7 +182,7 @@ public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
         container.showLoginForm();
     }
 
-    public boolean isAuthenticationErrorResponse(HTTPClient client, HTTPClient.Response response) {
+    public boolean isAuthenticationErrorResponse(HTTPClient client, Response response) {
         String requestURL = response.getRequestURL();
         // Note that authentication failures returned by login don't count as authentication errors
         // here.
@@ -198,20 +201,25 @@ public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
                 kv("user_pass",  password )
             );
             client.post( getLoginURL(), data )
-            .then((id)^(IFHTTPClientResponse *response) {
-                if (response.httpResponse.statusCode == 201) {
-                    [promise resolve:response];
-                }
-                else {
-                    [self handleReauthenticationFailure];
-                    [promise reject:response];
-                }
-                return nil;
-            })
-            .fail(^(id error) {
-                [self handleReauthenticationFailure];
-                [promise reject:error];
-            });
+                .then( new Q.Promise.Callback<Response,Response>() {
+                    public Response result(Response response) {
+                        int statusCode = response.getStatusCode();
+                        if( statusCode == 201 ) {
+                            promise.resolve(response);
+                        }
+                        else {
+                            handleReauthenticationFailure();
+                            promise.reject( String.format("Reauthentication failure: Status code %d", statusCode ) );
+                        }
+                        return response;
+                    }
+                })
+                .error( new Q.Promise.ErrorCallback() {
+                    public void error(Exception e) {
+                        handleReauthenticationFailure();
+                        promise.reject( e );
+                    }
+                });
         }
         else {
             handleReauthenticationFailure();
