@@ -116,8 +116,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.packagedContentPath = "";
         this.uriSchemeName = "wp";
         this.wpRealm = "semo";
-        this.listFormats = l( l("table", new WPDataTableFormatter() ) );
-        this.postFormats = l( l("webview", WPDataWebviewFormatter() ) );
+        this.listFormats = m( kv("table", new WPDataTableFormatter() ) );
+        this.postFormats = m( kv("webview", new WPDataWebviewFormatter() ) );
         this.postURITemplate = "{uriSchemeName}:/post/{postID}";
 
         // Configuration template. Note that the top-level property types are inferred from the
@@ -445,8 +445,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     /** Render a post's content by evaluating template reference's within the content field. */
     public Map<String,Object> renderPostContent(Map<String,Object> postData) {
-        Object context = clientTemplateContext.getTemplateContext();
-        String contentHTML = renderTemplate( (String)postData.get( "content" ), context );
+        Object context = clientTemplateContext.makeTemplateContextForPostData( postData );
+        String contentHTML = renderTemplate( (String)postData.get("content"), context );
         postData.put( "content", contentHTML );
         return postData;
     }
