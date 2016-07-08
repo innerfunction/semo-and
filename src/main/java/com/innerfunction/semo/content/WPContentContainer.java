@@ -229,6 +229,9 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     /** Return the child posts of a specified post. Optionally renders the post content. */
     public List<Map<String,Object>> getPostChildren(String postID, Map<String,Object> params, boolean renderContent) {
+        if( params == null ) {
+            params = new HashMap<>();
+        }
         // Check the post type.
         Map<String,Object> postData = postDB.read("posts", postID );
         String postType = (String)postData.get("type");
