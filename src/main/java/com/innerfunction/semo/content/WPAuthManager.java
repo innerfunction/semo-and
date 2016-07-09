@@ -15,6 +15,7 @@ package com.innerfunction.semo.content;
 
 import android.text.TextUtils;
 
+import com.innerfunction.http.Client;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.q.Q;
 import com.innerfunction.util.KeyPath;
@@ -23,7 +24,7 @@ import com.innerfunction.util.Paths;
 import com.innerfunction.util.UserDefaults;
 
 import static com.innerfunction.util.DataLiterals.*;
-import static com.innerfunction.semo.content.HTTPClient.Response;
+import static com.innerfunction.http.Client.Response;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +36,7 @@ import java.util.Map;
  * A class for managing user authentication via Wordpress login and registration.
  * Created by juliangoacher on 08/07/16.
  */
-public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
+public class WPAuthManager implements Client.AuthenticationDelegate {
 
     private WPContentContainer container;
     private String wpRealm;
@@ -182,15 +183,15 @@ public class WPAuthManager implements HTTPClient.AuthenticationDelegate {
         container.showLoginForm();
     }
 
-    public boolean isAuthenticationErrorResponse(HTTPClient client, Response response) {
+    public boolean isAuthenticationErrorResponse(Client client, Response response) {
         String requestURL = response.getRequestURL();
         // Note that authentication failures returned by login don't count as authentication errors
         // here.
         return response.getStatusCode() == 401 && !requestURL.equals( getLoginURL() );
     }
 
-    public Q.Promise<HTTPClient.Response> reauthenticateUsingHTTPClient(HTTPClient client) {
-        final Q.Promise<HTTPClient.Response> promise = new Q.Promise<HTTPClient.Response>();
+    public Q.Promise<Client.Response> reauthenticateUsingHTTPClient(Client client) {
+        final Q.Promise<Client.Response> promise = new Q.Promise<Client.Response>();
         // Read username and password from local storage and keychain.
         String username = userDefaults.getString( getWPRealmKey("user_login") );
         String password = userDefaults.getString( getWPRealmKey("user_pass") );

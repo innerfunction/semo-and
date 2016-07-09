@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.innerfunction.http.Client;
 import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
 import com.innerfunction.pttn.IOCContainerAware;
@@ -97,7 +98,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     /** An object used to manage WP server authentication. */
     private WPAuthManager authManager;
     /** A HTTP client. */
-    private HTTPClient httpClient;
+    private Client httpClient;
     /** The maximum number of rows to return for wp:search results. */
     private int searchResultLimit;
     /**
@@ -185,7 +186,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Factory for producing login + account management forms.
         this.formFactory = new WPContentContainerFormFactory( this );
 
-        this.httpClient = new HTTPClient();
+        this.httpClient = new Client();
 
         this.authManager = new WPAuthManager( this );
         httpClient.setAuthenticationDelegate( authManager );
@@ -671,11 +672,11 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.authManager = authManager;
     }
 
-    public void setHTTPClient(HTTPClient client) {
+    public void setHTTPClient(Client client) {
         this.httpClient = client;
     }
 
-    public HTTPClient getHTTPClient() {
+    public Client getHTTPClient() {
         return httpClient;
     }
 
