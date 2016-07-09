@@ -13,12 +13,18 @@
 // limitations under the License
 package com.innerfunction.semo.commands;
 
+import android.util.Log;
+
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
+ * A queue for running tasks on a background thread.
+ * TODO Move this class to pttn.util if/when HTTPClient is moved to pttn.http
  * Created by juliangoacher on 07/05/16.
  */
 public class RunQueue extends LinkedBlockingQueue<Runnable> {
+
+    static final String Tag = RunQueue.class.getSimpleName();
 
     private Thread runThread;
 
@@ -31,7 +37,7 @@ public class RunQueue extends LinkedBlockingQueue<Runnable> {
                         next.run();
                     }
                     catch(Exception e) {
-
+                        Log.e( Tag, "Running task", e );
                     }
                 }
             }
@@ -45,6 +51,7 @@ public class RunQueue extends LinkedBlockingQueue<Runnable> {
             put( runnable );
         }
         catch(Exception e) {
+            Log.w( Tag, "Dispatching task", e );
             ok = false;
         }
         return ok;

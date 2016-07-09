@@ -14,34 +14,105 @@
 package com.innerfunction.semo.content;
 
 import com.innerfunction.q.Q;
+import com.innerfunction.semo.commands.RunQueue;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
+ * An HTTP client.
+ * TODO Probably makes sense to move this to its own package in core Pttn.
  * Created by juliangoacher on 08/07/16.
  */
 public class HTTPClient {
 
-    /** A HTTP response. */
-    static class Response {
+    /** A HTTP client request. */
+    static class Request {
+        /** The URL being connected to. */
+        URL url;
+        /** The HTTP method, e.g. GET, POST. */
+        String method;
+        /** Optional request body data. */
+        byte[] body;
 
-        public String getRequestURL() {
-            return null;
+        public Request(String url, String method) throws MalformedURLException {
+            this.url = new URL( url );
+            this.method = method;
         }
 
-        public int getStatusCode() {
-            return 0;
+        public void setBody(String body) {
+            this.body = body.getBytes();
         }
 
-        public Map<String,Object> parseData() {
-            return null;
+        Response connect() throws IOException, ProtocolException {
+            HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+            try {
+                connection.setRequestMethod( method );
+                // TODO Some of these connection settings should be configured via properties on the client.
+                connection.setConnectTimeout( 5000 );
+                connection.setReadTimeout( 5000 );
+                if( body != null ) {
+                    connection.setDoInput(true);
+                    connection.setFixedLengthStreamingMode( body.length );
+                    BufferedOutputStream out = new BufferedOutputStream( connection.getOutputStream() );
+                    out.write( body );
+                    out.flush();
+                }
+                // TODO: Differentiate between file and data downloads; data downloads kept in memory, file downloads go to disk.
+                // TODO: Following code needs review.
+                BufferedInputStream in = new BufferedInputStream( connection.getInputStream(), 1024 ); // NOTE buffer size
+                byte[] body = new byte[0];
+                int offset = 0;
+                while( true ) {
+                    if( body.length - offset < in.available() ) {
+                        body = Arrays.copyOf( body, offset + in.available() );
+                    }
+                    int read = in.read( body, offset, body.length - offset );
+                    if( read > -1 ) {
+                        offset += read;
+                    }
+                    else break;
+                }
+                return new Response( url, connection.getResponseCode(), body );
+            }
+            finally {
+                connection.disconnect();
+            }
         }
     }
 
-    /** A wrapper for a discrete HTTP action. */
-    interface Action {
-        /** Submit the action. */
-        Q.Promise<Response> submit();
+    /** A HTTP client response. */
+    static class Response {
+
+        String url;
+        int statusCode;
+        byte[] body;
+
+        Response(URL url, int statusCode, byte[] body) {
+            this.url = url.toString();
+            this.statusCode = statusCode;
+            this.body = body;
+        }
+
+        public String getRequestURL() {
+            return url;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public Map<String,Object> parseData() {
+            // TODO Rename this to parse JSON? Check content type? What other content types need to be supported?
+            return null;
+        }
     }
 
     /**
@@ -60,38 +131,29 @@ public class HTTPClient {
         this.authenticationDelegate = delegate;
     }
 
-    public Q.Promise<Response> get(String url) {
+    public Q.Promise<Response> get(String url) throws MalformedURLException {
         return get( url, null );
     }
 
-    public Q.Promise<Response> get(final String url, final Map<String,Object> data) {
-        return submit(new Action() {
-            @Override
-            public Q.Promise<Response> submit() {
-                return null;
-            }
-        });
+    public Q.Promise<Response> get(final String url, final Map<String,Object> data) throws MalformedURLException {
+        // TODO Add request parameters to URL
+        Request request = new Request( url, "GET");
+        return submit( request );
     }
 
-    public Q.Promise<Response> getFile(final String url) {
-        return submit(new Action() {
-            @Override
-            public Q.Promise<Response> submit() {
-                return null;
-            }
-        });
+    public Q.Promise<Response> getFile(final String url) throws MalformedURLException {
+        Request request = new Request( url, "GET");
+        // TODO Probably need two request types - DataRequest and FileRequest
+        return submit( request );
     }
 
-    public Q.Promise<Response> post(final String url, final Map<String,Object> data) {
-        return submit(new Action() {
-            @Override
-            public Q.Promise<Response> submit() {
-                return null;
-            }
-        });
+    public Q.Promise<Response> post(final String url, final Map<String,Object> data) throws MalformedURLException {
+        Request request = new Request( url, "POST");
+        // TODO Encode and set request body
+        return submit( request );
     }
 
-    public Q.Promise<Response> submit(String method, String url, Map<String,Object> data) {
+    public Q.Promise<Response> submit(String method, String url, Map<String,Object> data) throws MalformedURLException {
         return "POST".equals( method ) ? post( url, data ) : get( url, data );
     }
 
@@ -109,22 +171,28 @@ public class HTTPClient {
         return Q.reject("Authentication delegate not available");
     }
 
+    static final RunQueue RequestQueue = new RunQueue();
+
     /**
      * Submit an HTTP action and handle authentication failures.
      */
-    private Q.Promise<Response> submit(final Action action) {
+    private Q.Promise<Response> submit(final Request request) {
         final Q.Promise<Response> promise = new Q.Promise<>();
-        // Submit the action.
-        action.submit()
-            .then( new Q.Promise.Callback<Response,Response>() {
-                public Response result(Response response) {
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Response response = request.connect();
                     // Check for authentication failures.
+                    // TODO Following code needs to be reviewed - does it interact correctly with the request queue?
+                    // TODO i.e. specifically the reauthenticate step, and the re-submit that follows it.
                     if( isAuthenticationErrorResponse( response ) ) {
                         // Try to reauthenticate and then resubmit the original request.
                         reauthenticate()
                             .then(new Q.Promise.Callback<Response, Response>() {
                                 public Response result(Response response) {
-                                    promise.resolve( action.submit() );
+                                    // Resubmit the request
+                                    submit( request );
                                     return response;
                                 }
                             })
@@ -137,14 +205,16 @@ public class HTTPClient {
                     else {
                         promise.resolve( response );
                     }
-                    return response;
                 }
-            })
-            .error( new Q.Promise.ErrorCallback() {
-                public void error(Exception e) {
+                catch(IOException e) {
                     promise.reject( e );
                 }
-            });
+            }
+        };
+        // Place the request on the request queue.
+        if( !RequestQueue.dispatch( task ) ) {
+            promise.reject("Failed to dispatch to request queue");
+        }
         return promise;
     }
 }
