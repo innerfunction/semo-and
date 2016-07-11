@@ -681,6 +681,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.authManager = authManager;
     }
 
+    public WPAuthManager getAuthManager() {
+        return authManager;
+    }
+
     public void setHTTPClient(Client client) {
         this.httpClient = client;
     }

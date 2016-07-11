@@ -20,11 +20,11 @@ import android.widget.ProgressBar;
 /**
  * Created by juliangoacher on 25/05/16.
  */
-public class SubmitFormFieldView extends FormFieldView implements FormView.LoadingIndicator {
+public class FormSubmitFieldView extends FormFieldView implements FormView.LoadingIndicator {
 
     private ProgressBar loadingIndicator;
 
-    public SubmitFormFieldView(Context context) {
+    public FormSubmitFieldView(Context context) {
         super( context );
         setIsSelectable( true );
         this.loadingIndicator = new ProgressBar( context, null, android.R.style.Widget_ProgressBar_Small );

@@ -43,6 +43,19 @@ public class FormView extends ScrollView {
         void showFormLoading(boolean loading);
     }
 
+    /**
+     * A delegate interface for handling certain form lifecycle events.
+     * TODO Calls by the form to these methods has to be yet implemented.
+     */
+    public class Delegate {
+        /** Called after the form has submitted successfully. */
+        public void onSubmitOk(FormView form, Map<String,Object> data) {}
+        /** Called after the form has submitted but the server returns an error. */
+        public void onSubmitError(FormView form, Map<String,Object> data) {}
+        /** Called when an exception occurs during a form submit. */
+        void onSubmitRequestException(FormView form, Exception error) {}
+    }
+
     /** The android app context. */
     private Context androidContext;
     /** The form's fields layout. */
