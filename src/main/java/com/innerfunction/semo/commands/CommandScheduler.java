@@ -46,7 +46,7 @@ public class CommandScheduler {
     static final RunQueue ExecRunQueue = new RunQueue();
 
     /** Empty command list, used to indicate that a command has no follow on commands. */
-    public static final List<Command> NoFollowOns = Collections.emptyList();
+    public static final List<CommandItem> NoFollowOns = Collections.emptyList();
 
     /** The queue database. */
     private DB db;

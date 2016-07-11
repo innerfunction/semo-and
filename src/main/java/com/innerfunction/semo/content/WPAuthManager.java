@@ -14,8 +14,11 @@
 package com.innerfunction.semo.content;
 
 import android.text.TextUtils;
+import android.util.Log;
 
+import com.innerfunction.http.AuthenticationDelegate;
 import com.innerfunction.http.Client;
+import com.innerfunction.http.Response;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.q.Q;
 import com.innerfunction.util.KeyPath;
@@ -24,8 +27,8 @@ import com.innerfunction.util.Paths;
 import com.innerfunction.util.UserDefaults;
 
 import static com.innerfunction.util.DataLiterals.*;
-import static com.innerfunction.http.Client.Response;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,7 +39,9 @@ import java.util.Map;
  * A class for managing user authentication via Wordpress login and registration.
  * Created by juliangoacher on 08/07/16.
  */
-public class WPAuthManager implements Client.AuthenticationDelegate {
+public class WPAuthManager implements AuthenticationDelegate {
+
+    static final String Tag = WPAuthManager.class.getSimpleName();
 
     private WPContentContainer container;
     private String wpRealm;
@@ -162,22 +167,28 @@ public class WPAuthManager implements Client.AuthenticationDelegate {
     public void showPasswordReminder() {
         // Fetch the password reminder URL from the server.
         String url = Paths.join(feedURL, "account/password-reminder");
-        container.getHTTPClient().get(url)
-            .then( new Q.Promise.Callback<Response,Response>() {
-                public Response result(Response response) {
-                    Map<String,Object> data = response.parseData();
-                    String reminderURL = KeyPath.getValueAsString("lost_password_url", data );
-                    if( reminderURL != null ) {
-                        // Open the URL in the device browser.
-                        AppContainer.getAppContainer().openURL( reminderURL );
+        try {
+            container.getHTTPClient().get( url )
+                .then( new Q.Promise.Callback<Response, Response>() {
+                    @Override
+                    public Response result(Response response) {
+                        Map<String, Object> data = (Map<String,Object>)response.parseBodyData();
+                        String reminderURL = KeyPath.getValueAsString( "lost_password_url", data );
+                        if( reminderURL != null ) {
+                            // Open the URL in the device browser.
+                            AppContainer.getAppContainer().openURL( reminderURL );
+                        }
+                        return response;
                     }
-                    return response;
-                }
-            });
+                } );
+        }
+        catch(MalformedURLException e) {
+            Log.e(Tag, String.format("Bad URL: %s", url ));
+        }
     }
 
-    private void handleReauthenticationFailure() {
-        String message = "Reauthentication%20failure";
+    private void handleAuthenticationFailure() {
+        String message = "Authentication%20failure";
         String toastAction = String.format("post:toast+message=%s", message );
         AppContainer.getAppContainer().postMessage( toastAction, container );
         container.showLoginForm();
@@ -190,8 +201,8 @@ public class WPAuthManager implements Client.AuthenticationDelegate {
         return response.getStatusCode() == 401 && !requestURL.equals( getLoginURL() );
     }
 
-    public Q.Promise<Client.Response> reauthenticateUsingHTTPClient(Client client) {
-        final Q.Promise<Client.Response> promise = new Q.Promise<Client.Response>();
+    public Q.Promise<Response> authenticateUsingHTTPClient(Client client) {
+        final Q.Promise<Response> promise = new Q.Promise<Response>();
         // Read username and password from local storage and keychain.
         String username = userDefaults.getString( getWPRealmKey("user_login") );
         String password = userDefaults.getString( getWPRealmKey("user_pass") );
@@ -201,29 +212,35 @@ public class WPAuthManager implements Client.AuthenticationDelegate {
                 kv("user_login", username ),
                 kv("user_pass",  password )
             );
-            client.post( getLoginURL(), data )
-                .then( new Q.Promise.Callback<Response,Response>() {
-                    public Response result(Response response) {
-                        int statusCode = response.getStatusCode();
-                        if( statusCode == 201 ) {
-                            promise.resolve(response);
+            try {
+                client.post( getLoginURL(), data )
+                    .then( new Q.Promise.Callback<Response, Response>() {
+                        public Response result(Response response) {
+                            int statusCode = response.getStatusCode();
+                            if( statusCode == 201 ) {
+                                promise.resolve( response );
+                            }
+                            else {
+                                handleAuthenticationFailure();
+                                promise.reject( String.format( "Authentication failure: Status code %d", statusCode ) );
+                            }
+                            return response;
                         }
-                        else {
-                            handleReauthenticationFailure();
-                            promise.reject( String.format("Reauthentication failure: Status code %d", statusCode ) );
+                    } )
+                    .error( new Q.Promise.ErrorCallback() {
+                        public void error(Exception e) {
+                            handleAuthenticationFailure();
+                            promise.reject( e );
                         }
-                        return response;
-                    }
-                })
-                .error( new Q.Promise.ErrorCallback() {
-                    public void error(Exception e) {
-                        handleReauthenticationFailure();
-                        promise.reject( e );
-                    }
-                });
+                    } );
+            }
+            catch(MalformedURLException e) {
+                handleAuthenticationFailure();
+                promise.reject( e );
+            }
         }
         else {
-            handleReauthenticationFailure();
+            handleAuthenticationFailure();
             promise.reject("Reauthentication failure: Username and password not available");
         }
         return promise;

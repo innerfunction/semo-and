@@ -13,6 +13,7 @@
 // limitations under the License
 package com.innerfunction.semo.content;
 
+import android.content.Context;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -27,6 +28,7 @@ import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.pttn.app.NamedScheme;
 import com.innerfunction.semo.commands.CommandScheduler;
 import com.innerfunction.semo.db.DB;
+import com.innerfunction.uri.StandardURIHandler;
 import com.innerfunction.uri.URIHandler;
 import com.innerfunction.util.Files;
 import com.innerfunction.util.Paths;
@@ -111,7 +113,9 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
      */
     private Map<String,Object> postTypeRelations;
 
-    public WPContentContainer() {
+    public WPContentContainer(Context context) {
+        super( context, StandardURIHandler.getInstance( context ) );
+
         this.postDBName = "com.innerfunction.semo.content";
         this.feedURL = "";
         this.packagedContentPath = "";
@@ -186,7 +190,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Factory for producing login + account management forms.
         this.formFactory = new WPContentContainerFormFactory( this );
 
-        this.httpClient = new Client();
+        this.httpClient = new Client( context );
 
         this.authManager = new WPAuthManager( this );
         httpClient.setAuthenticationDelegate( authManager );

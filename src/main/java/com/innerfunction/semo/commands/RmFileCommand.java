@@ -29,7 +29,7 @@ import java.util.List;
 public class RmFileCommand implements Command {
 
     @Override
-    public Q.Promise<List<Command>> execute(String name, List args) {
+    public Q.Promise<List<CommandScheduler.CommandItem>> execute(String name, List args) {
         for(Object arg : args) {
             String path = arg.toString();
             File file = new File( path );
