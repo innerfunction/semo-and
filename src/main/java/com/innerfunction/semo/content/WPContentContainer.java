@@ -28,9 +28,11 @@ import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.pttn.app.NamedScheme;
 import com.innerfunction.semo.commands.CommandScheduler;
 import com.innerfunction.semo.db.DB;
+import com.innerfunction.semo.db.DBFilter;
 import com.innerfunction.uri.StandardURIHandler;
 import com.innerfunction.uri.URIHandler;
 import com.innerfunction.util.Files;
+import com.innerfunction.util.KeyPath;
 import com.innerfunction.util.Paths;
 import com.innerfunction.util.Regex;
 import com.innerfunction.util.StringTemplate;
@@ -334,11 +336,11 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             for( String paramName : params.keySet() ) {
                 // The 'orderBy' parameter is a special name used to specify sort order.
                 if( "_orderBy".equals( paramName ) ) {
-                    filter.setOrderBy( params.get("_orderBy") );
+                    filter.setOrderBy( KeyPath.getValueAsString("_orderBy", params ) );
                     continue;
                 }
                 String fieldName = paramName;
-                String paramValue = params.get( paramName );
+                String paramValue = KeyPath.getValueAsString( paramName, params );
                 // Check for a comparison suffix on the name.
                 String[] groups = re.matches( paramName );
                 if( groups.length > 1 ) {
@@ -366,7 +368,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             postData = filter.applyTo( postDB, null );
             //postData = [filter applyTo:_postDB withParameters:@{}];
         }
-        String format = params.get( "_format" );
+        String format = KeyPath.getValueAsString("_format", params );
         if( format == null ) {
             format = "table";
         }
@@ -432,7 +434,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             // If a parent post ID is specified then add a join to, and filter on, the closures
             // table.
             tables = tables.concat(", closures");
-            where = where.concat(" AND closures.parent=? AND closures.child=posts.id";
+            where = where.concat(" AND closures.parent=? AND closures.child=posts.id");
             params.add( parentPostID );
         }
         String sql = String.format("SELECT posts.* FROM %s WHERE %s LIMIT %d", tables, where, searchResultLimit );
@@ -525,12 +527,15 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Configure the command scheduler.
         commandScheduler.setQueueDBName( String.format("%s.scheduler", postDBName ) );
         if( contentProtocol != null ) {
-            commandScheduler.addCommand("content", contentProtocol );
+            commandScheduler.setCommand("content", contentProtocol );
         }
 
         GetURLCommand getCmd = new GetURLCommand( httpClient );
         getCmd.setMaxRequestsPerMinute( 30.0f );
-        commandScheduler.addCommand("get", getCmd );
+        commandScheduler.setCommand("get", getCmd );
+
+        DownloadZipCommand dlzipCmd = new DownloadZipCommand( httpClient, commandScheduler );
+        commandScheduler.setCommand("dlzip", dlzipCmd );
     }
 
     // MessageReceiver

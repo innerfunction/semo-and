@@ -134,22 +134,25 @@ public class CommandScheduler {
     public void setCommands(Map<String,Command> commands) {
         for( String name : commands.keySet() ) {
             Command command = commands.get( name );
-            if( command instanceof CommandProtocol ) {
-                CommandProtocol protocol = (CommandProtocol)command;
-                protocol.setCommandPrefix( name );
-                // Iterate over the protocol's supported commands and add to the command
-                // namespace under a fully qualified name.
-                Map<String,Command> protocolCommands = protocol.getCommands();
-                for( String subname : protocolCommands.keySet() ) {
-                    String qualifiedName = String.format("%s.%s", name, subname );
-                    this.commands.put( qualifiedName, command );
-                }
-            }
-            else {
-                this.commands.put( name, command );
+            setCommand( name, command );
+        }
+    }
+
+    public void setCommand(String name, Command command) {
+        if( command instanceof CommandProtocol ) {
+            CommandProtocol protocol = (CommandProtocol)command;
+            protocol.setCommandPrefix( name );
+            // Iterate over the protocol's supported commands and add to the command
+            // namespace under a fully qualified name.
+            Map<String,Command> protocolCommands = protocol.getCommands();
+            for( String subname : protocolCommands.keySet() ) {
+                String qualifiedName = String.format("%s.%s", name, subname );
+                this.commands.put( qualifiedName, command );
             }
         }
-        this.commands = commands;
+        else {
+            this.commands.put( name, command );
+        }
     }
 
     public void setDeleteExecutedQueueRecords(boolean delete) {

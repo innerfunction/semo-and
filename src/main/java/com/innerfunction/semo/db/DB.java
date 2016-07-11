@@ -41,6 +41,16 @@ public class DB implements Service, IOCContextAware {
 
     static final String Tag = DB.class.getSimpleName();
 
+    /**
+     * Constant used to represent null query parameter values in collections.
+     * NOTE: The code checks for reference equality when replacing the constant value in a
+     * parameter array. This normally would work fine for object constants, but because string
+     * constants are automatically interned then is a _very small_ chance that an actual parameter
+     * value could be confused for the this constant value (i.e. if the parameter had the same
+     * string value, and was interned).
+     */
+    public static final String NullParameterValue = DB.class.getCanonicalName()+"#NullParameterValue";
+
     /** The android context - needed for the database helper. */
     private Context androidContext;
     /** A helper for managing database initializations and upgrades. */
@@ -166,6 +176,26 @@ public class DB implements Service, IOCContextAware {
     }
 
     /**
+     * Filter the entries in a map and return a new map whose entry keys are valid column names in
+     * the specified table.
+     * @param table     A table name.
+     * @param values    A map of column name / value entries.
+     * @return A new map of column name / value entries.
+     */
+    public Map<String,Object> filterColumnNamesForTable(String table, Map<String,Object> values) {
+        Map<String,Object> result = new HashMap<>();
+        Set<String> columnNames = tableColumnNames.get( table );
+        if( columnNames != null ) {
+            for( String name : values.keySet() ) {
+                if( columnNames.contains( name ) ) {
+                    result.put( name, values.get( name ) );
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Read an object from the database.
      * @param table     The name of the table containing the data.
      * @param id        The ID of the object to read.
@@ -204,6 +234,7 @@ public class DB implements Service, IOCContextAware {
         }
         return result;
     }
+
     /**
      * Query the DB.
      * @param sql   The SQL to execute.
@@ -214,6 +245,16 @@ public class DB implements Service, IOCContextAware {
         return performQuery( sql, args.toArray( new String[args.size()] ));
     }
 
+    /** Replace occurrence of the NullParameterValue constant in an array. */
+    private String[] replaceNullParameterValue(String... args) {
+        for( int i = 0; i < args.length; i++ ) {
+            if( args[i] == NullParameterValue ) {
+                args[i] = null;
+            }
+        }
+        return args;
+    }
+
     /**
      * Query the DB.
      * @param sql   The SQL to execute.
@@ -221,6 +262,7 @@ public class DB implements Service, IOCContextAware {
      * @return A list of map objects. Each map contains data from a single row of the query result.
      */
     public List<Map<String,Object>> performQuery(String sql, String... args) {
+        args = replaceNullParameterValue( args );
         List<Map<String,Object>> result = new ArrayList<>();
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.rawQuery( sql, args );
@@ -242,6 +284,7 @@ public class DB implements Service, IOCContextAware {
      * @return true if the statement executed successfully.
      */
     public boolean performUpdate(String sql, String... args) {
+        args = replaceNullParameterValue( args );
         boolean ok = true;
         SQLiteStatement statement = null;
         try {
@@ -264,6 +307,7 @@ public class DB implements Service, IOCContextAware {
 
     /** Return the number of records matching the specified where clause in the specified table. */
     public int countInTable(String table, String where, String... args) {
+        args = replaceNullParameterValue( args );
         int count = 0;
         String sql = String.format("SELECT count(*) AS count FROM %s WHERE %s", table, where );
         List<Map<String,Object>> result = performQuery( sql, args );
@@ -518,6 +562,7 @@ public class DB implements Service, IOCContextAware {
     }
 
     public int deleteWhere(String table, String where, String... args) {
+        args = replaceNullParameterValue( args );
         SQLiteDatabase db = helper.getWritableDatabase();
         return db.delete( table, where, args );
     }
