@@ -16,15 +16,23 @@ package com.innerfunction.semo.form;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
+import com.innerfunction.http.Client;
+import com.innerfunction.http.Response;
 import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.q.Q;
+import com.innerfunction.semo.commands.CommandScheduler;
 import com.innerfunction.util.Null;
 import com.innerfunction.util.StringTemplate;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +42,8 @@ import java.util.Map;
  * Created by juliangoacher on 14/05/16.
  */
 public class FormView extends ScrollView {
+
+    static final String Tag = FormView.class.getSimpleName();
 
     /**
      * An interface implemented by form fields capable of acting as form loading indicators.
@@ -45,15 +55,21 @@ public class FormView extends ScrollView {
 
     /**
      * A delegate interface for handling certain form lifecycle events.
-     * TODO Calls by the form to these methods has to be yet implemented.
      */
     public class Delegate {
         /** Called after the form has submitted successfully. */
         public void onSubmitOk(FormView form, Map<String,Object> data) {}
         /** Called after the form has submitted but the server returns an error. */
         public void onSubmitError(FormView form, Map<String,Object> data) {}
-        /** Called when an exception occurs during a form submit. */
-        void onSubmitRequestException(FormView form, Exception error) {}
+        /**
+         * Called when an exception occurs during a form submit.
+         * The default implementation logs the error and calls the form's showErrorNotification()
+         * method.
+         */
+        void onSubmitRequestException(FormView form, Exception error) {
+            Log.e(Tag,String.format("%s %s", form.method, form.submitURL ), error );
+            showErrorNotification("Form submit error");
+        }
     }
 
     /** The android app context. */
@@ -78,6 +94,10 @@ public class FormView extends ScrollView {
     private boolean isEnabled = true;
     /** A form loading indicator. */
     private LoadingIndicator loadingIndicator;
+    /** An HTTP client. Used when submitting the form values to a server. */
+    private Client httpClient;
+    /** A form lifecycle delegate. */
+    private Delegate delegate = new Delegate();
 
     public FormView(Context context) {
         super( context );
@@ -93,6 +113,16 @@ public class FormView extends ScrollView {
 
         setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
         addView( fieldLayout );
+    }
+
+    /** Set the form's HTTP client. */
+    public void setHTTPClient(Client httpClient) {
+        this.httpClient = httpClient;
+    }
+
+    /** Set the form lifecycle delegate. */
+    public void setDelegate(Delegate delegate) {
+        this.delegate = (delegate == null) ? new Delegate() : delegate;
     }
 
     /** Get the current value of a named field. */
@@ -169,9 +199,35 @@ public class FormView extends ScrollView {
     public boolean submit() {
         boolean ok = validate();
         if( ok ) {
-            if( submitURL != null ) {
+            if( submitURL != null && httpClient != null ) {
                 showSubmittingAppearance( true );
-                // TODO Submit using HTTP client.
+                try {
+                    httpClient.submit( method, submitURL, getInputValues() )
+                        .then( new Q.Promise.Callback<Response, Response>() {
+                            @Override
+                            public Response result(Response response) {
+                                Map<String, Object> data = (Map<String,Object>)response.parseBodyData();
+                                if( isSubmitErrorResponse( response ) ) {
+                                    delegate.onSubmitError( FormView.this, data );
+                                }
+                                else {
+                                    delegate.onSubmitOk( FormView.this, data );
+                                }
+                                showSubmittingAppearance( false );
+                                return response;
+                            }
+                        })
+                        .error( new Q.Promise.ErrorCallback() {
+                            public void error(Exception e) {
+                                delegate.onSubmitRequestException( FormView.this, e );
+                            }
+                        });
+                }
+                catch(MalformedURLException e) {
+                    Log.e(Tag, String.format("Bad submitURL %s", submitURL ));
+                    showSubmittingAppearance( false );
+                    ok = false;
+                }
             }
             else if( submitURI != null ) {
                 showSubmittingAppearance( true );
@@ -196,11 +252,17 @@ public class FormView extends ScrollView {
         this.isEnabled = !submitting;
     }
 
+    /** Test if a form submit response is an error response. */
+    public boolean isSubmitErrorResponse(Response response) {
+        return response.getStatusCode() >= 400;
+    }
+
     /**
      * Display a notification of a form error.
      */
     public void showErrorNotification(String message) {
-
+        message = String.format("post:toast+message=%s", Uri.encode( message) );
+        AppContainer.getAppContainer().postMessage( message, this );
     }
 
     /**
@@ -221,7 +283,7 @@ public class FormView extends ScrollView {
     public void hideKeyboard() {
         // TODO: Need to review methods for resolving the current activity -
         // TODO: Would be better if the view had the reference directly.
-        Activity activity = (Activity)AppContainer.getAppContainer().getCurrentActivity();
+        Activity activity = AppContainer.getAppContainer().getCurrentActivity();
         View view = activity.getCurrentFocus();
         if( view != null ) {
             InputMethodManager imm = (InputMethodManager)activity.getSystemService( Context.INPUT_METHOD_SERVICE );
@@ -290,7 +352,7 @@ public class FormView extends ScrollView {
         }
     }
 
-    public Map<String,?> getInputValues() {
+    public Map<String,Object> getInputValues() {
         return inputValues;
     }
 
