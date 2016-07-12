@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A container for Wordpress sourced content.
+ *
  * Created by juliangoacher on 29/05/16.
  */
 public class WPContentContainer extends Container implements IOCContainerAware, MessageReceiver {
@@ -123,7 +125,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.packagedContentPath = "";
         this.uriSchemeName = "wp";
         this.wpRealm = "semo";
-        this.listFormats = m( kv("table", new WPDataTableFormatter() ) );
+        Object listFormats = m( kv("table", new WPDataTableFormatter() ) );
+        this.listFormats = (Map<String,DataFormatter>)listFormats;
         this.postFormats = m( kv("webview", new WPDataWebviewFormatter() ) );
         this.postURITemplate = "{uriSchemeName}:/post/{postID}";
 
@@ -245,7 +248,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Check for child type relations for this post type.
         Object childTypes = postTypeRelations.get( postType );
         if( childTypes != null ) {
-            params.putAll( m( kv("type", childTypes ) );
+            params.putAll( m( kv("type", childTypes ) ) );
         }
         params.put("parent", postID );
         // Create the query.
@@ -492,7 +495,16 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     @Override
     public void afterIOCConfigure(Configuration configuration) {
         // Packaged content is packaged with the app executable.
-        String packagedContentPath = [MainBundlePath stringByAppendingPathComponent:_packagedContentPath];
+        String packagedContentPath = "";
+        /* TODO
+        Packaged content has to be read from assets. Following code taken from com.eventpac.subscriptions.SubsSchemeHandler
+            String assetName = Paths.join( subsService.getInitialContentPath(), uri.getName() );
+            if( assetManager.assetExists( assetName ) ) {
+                resource = new AnRResource.Asset( context, assetName, assetManager, uri, parent );
+
+        iOS code:
+            String packagedContentPath = [MainBundlePath stringByAppendingPathComponent:_packagedContentPath];
+         */
 
         // Setup configuration parameters.
         Map<String,Object> parameters = m(
@@ -519,7 +531,9 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Create the container's component configuration and setup to use the new URI handler
         Configuration componentConfig = configTemplate.extendWithParameters( parameters );
         componentConfig.setURIHandler( uriHandler ); // This necessary for relative URIs within the config to work.
-        componentConfig.setRoot( this ); // TODO Confirm that root is no longer needed
+        /* TODO Confirm that root is no longer needed
+        componentConfig.setRoot( this );
+        */
 
         // Configure the container's components.
         configureWith( componentConfig );
@@ -570,7 +584,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             // Interval is defined in minutes, so convert to ms by multiplying (60 secs) x (1000 ms)
             handler.postDelayed( this, updateCheckInterval * 60000 );
         }
-    }
+    };
 
     @Override
     public void startService() {
