@@ -15,7 +15,7 @@ package com.innerfunction.semo.content;
 
 import com.innerfunction.uri.CompoundURI;
 import com.innerfunction.uri.URIScheme;
-import com.innerfunction.util.Maps;
+import com.innerfunction.util.KeyPath;
 
 import java.util.Map;
 
@@ -95,14 +95,14 @@ public class WPSchemeHandler implements URIScheme {
                 }
             }
             else if( "search".equals( parts[0] ) ) {
-                String text = Maps.getValueAsString( params, "text");
-                String mode = Maps.getValueAsString( params, "mode");
+                String text = KeyPath.getValueAsString("text", params );
+                String mode = KeyPath.getValueAsString("mode", params );
                 String[] postTypes = null;
-                String types = Maps.getValueAsString( params, "types");
+                String types = KeyPath.getValueAsString("types", params );
                 if( types != null ) {
                     postTypes = types.split(",");
                 }
-                String parent = Maps.getValueAsString( params, "parent");
+                String parent = KeyPath.getValueAsString("parent", params );
                 return contentContainer.searchPostsForText( text, mode, parent, postTypes );
             }
         }
