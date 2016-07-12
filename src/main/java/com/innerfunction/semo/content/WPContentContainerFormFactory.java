@@ -19,6 +19,8 @@ import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
 import com.innerfunction.pttn.IOCObjectFactoryBase;
 import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.pttn.app.ViewController;
+import com.innerfunction.pttn.app.ViewControllerBehaviour;
 import com.innerfunction.semo.form.FormView;
 import com.innerfunction.semo.form.FormViewController;
 import com.innerfunction.util.KeyPath;
@@ -151,7 +153,7 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
         String submitURL = "";
         final String loginAction = configuration.getValueAsString("loginAction");
         boolean isEnabled = true;
-        ViewBehaviour viewBehaviour = null;
+        ViewControllerBehaviour viewBehaviour = null;
         FormView.Delegate formDelegate = null;
         final AppContainer appContainer = AppContainer.getAppContainer();
         final WPAuthManager authManager = contentContainer.getAuthManager();
@@ -159,21 +161,21 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
             submitURL = authManager.getLoginURL();
             boolean checkForLogin = configuration.getValueAsBoolean("checkForLogin", true );
             if( checkForLogin ) {
-                viewBehaviour = new WPContentLoginBehaviour( this, loginAction );
-                // viewBehaviour = [[IFWPContentLoginBehaviour alloc] initWithContainer:_container loginAction:loginAction];
+                viewBehaviour = new WPContentLoginBehaviour( contentContainer, loginAction );
             }
             formDelegate = new FormView.Delegate() {
                 @Override
                 public void onSubmitOk(FormView form, Map<String,Object> data) {
+                    Map<String,Object> profile = (Map<String,Object>)data.get("profile");
                     // Store user credentials & user info.
-                    authManager.storeUserProfile( data.get("profile") );
+                    authManager.storeUserProfile( profile );
                     authManager.storeUserCredentials( form.getInputValues() );
                     // Dispatch the specified event.
                     appContainer.postMessage( loginAction, form );
                 }
                 @Override
                 public void onSubmitError(FormView form, Map<String,Object> data) {
-                    String action = String.format("post:toast+message=%s", "Login%20failure");
+                    String action = String.format("post:toast+message=%s", Uri.encode("Login failure") );
                     appContainer.postMessage( action, form );
                 }
             };
@@ -183,8 +185,9 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
             formDelegate = new FormView.Delegate() {
                 @Override
                 public void onSubmitOk(FormView form, Map<String,Object> data) {
+                    Map<String,Object> profile = (Map<String,Object>)data.get("profile");
                     // Store user credentials & user info.
-                    authManager.storeUserProfile( data.get("profile") );
+                    authManager.storeUserProfile( profile );
                     authManager.storeUserCredentials( form.getInputValues() );
                     // Dispatch the specified event.
                     appContainer.postMessage( loginAction, form );
@@ -206,9 +209,10 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
             formDelegate = new FormView.Delegate() {
                 @Override
                 public void onSubmitOk(FormView form, Map<String,Object> data) {
+                    Map<String,Object> profile = (Map<String,Object>)data.get("profile");
                     // Update stored user info.
-                    authManager.storeUserProfile( data.get("profile") );
-                    String action = String.format("post:toast+message=%@", "Account%20updated");
+                    authManager.storeUserProfile( profile );
+                    String action = String.format("post:toast+message=%@", Uri.encode("Account updated") );
                     appContainer.postMessage( action, form );
                 }
                 @Override
@@ -223,6 +227,7 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
                 }
             };
         }
+        // Prepare configuration parameters.
         Map<String,Object> params = Maps.extend( StdParams );
         params.put("SubmitURL",     submitURL );
         params.put("IsEnabled",     isEnabled );
@@ -230,11 +235,14 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
         params.put("TitleStyle",    Null.valueOrPlaceholder( configuration.getValue("titleStyle") ) );
         params.put("InputStyle",    Null.valueOrPlaceholder( configuration.getValue("inputStyle") ) );
 
+        // Create the form configuration.
         configuration = configuration.configurationWithKeysExcluded("*factory", "formType", "fields");
 
+        // Build the form.
         FormViewController formView = buildObject( configuration, container, params, identifier );
         formView.setBehaviour( viewBehaviour );
 
+        // Additional form configuration.
         FormView form = formView.getForm();
         form.setDelegate( formDelegate );
         form.setHTTPClient( contentContainer.getHTTPClient() );
@@ -242,6 +250,7 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
             form.setInputValues( authManager.getUserProfile() );
         }
 
+        // Return the form.
         return formView;
     }
 

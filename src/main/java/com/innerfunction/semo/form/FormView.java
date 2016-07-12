@@ -56,7 +56,7 @@ public class FormView extends ScrollView {
     /**
      * A delegate interface for handling certain form lifecycle events.
      */
-    public class Delegate {
+    public static class Delegate {
         /** Called after the form has submitted successfully. */
         public void onSubmitOk(FormView form, Map<String,Object> data) {}
         /** Called after the form has submitted but the server returns an error. */
@@ -68,7 +68,7 @@ public class FormView extends ScrollView {
          */
         void onSubmitRequestException(FormView form, Exception error) {
             Log.e(Tag,String.format("%s %s", form.method, form.submitURL ), error );
-            showErrorNotification("Form submit error");
+            form.showErrorNotification("Form submit error");
         }
     }
 
