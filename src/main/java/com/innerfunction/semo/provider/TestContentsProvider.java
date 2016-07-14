@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
 
 import com.innerfunction.http.Client;
 import com.innerfunction.http.Response;
@@ -18,6 +19,8 @@ import java.io.FileNotFoundException;
  */
 public class TestContentsProvider extends ContentProvider {
 
+    static final String Tag = TestContentsProvider.class.getSimpleName();
+
     private File cacheDir;
     private Client httpClient;
 
@@ -30,16 +33,22 @@ public class TestContentsProvider extends ContentProvider {
 
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        String filePath = uri.getPath();
+        String filePath = uri.getPath().replace('/','_');
+        Log.d(Tag, String.format("openFile(%s) -> %s", uri, filePath ) );
         File cacheFile = new File( cacheDir, filePath );
         if( !cacheFile.exists() ) {
-            String url = String.format("http://doit-mobile.com/%s", filePath );
+            String url = String.format("http://doit-mobile.com%s", uri.getPath() );
             try {
                 Response response = httpClient.getFile( url, cacheFile ).sync();
+                Log.d(Tag, String.format("GET %s -> %d", url, response.getStatusCode() ) );
             }
             catch(Exception e) {
+                Log.e(Tag,"Getting file", e );
                 throw new FileNotFoundException( filePath );
             }
+        }
+        else {
+            Log.d(Tag, String.format("File cache hit: %s", filePath ) );
         }
         return ParcelFileDescriptor.open( cacheFile, ParcelFileDescriptor.MODE_READ_ONLY );
     }
