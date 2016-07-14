@@ -186,7 +186,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             kv("contentPath",                "$contentPath"),
             kv("commandScheduler",           m( kv("*and-class", "com.innerfunction.semo.commands.CommandScheduler")))
         );
-        this.configTemplate = new Configuration( template );
+        this.configTemplate = new Configuration( template, context );
 
         this.uriScheme = new WPSchemeHandler( this );
 
