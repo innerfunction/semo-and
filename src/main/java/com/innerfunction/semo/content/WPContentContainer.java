@@ -144,15 +144,15 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
                             kv( "id", m( kv( "type", "INTEGER" ), kv( "tag", "id" ) ) ), // Post ID
                             kv( "title", m( kv( "type", "TEXT" ) ) ),
                             kv( "type", m( kv( "type", "TEXT" ) ) ),
-                            kv( "status", m( kv( "type", "TEXT" ) ) ),      // i.e. WP post status
-                            kv( "modified", m( kv( "type", "TEXT" ) ) ),      // Modification date/time; ISO 8601 format string.
+                            kv( "status", m( kv( "type", "TEXT" ) ) ),       // i.e. WP post status
+                            kv( "modified", m( kv( "type", "TEXT" ) ) ),     // Modification date/time; ISO 8601 format string.
                             kv( "content", m( kv( "type", "TEXT" ) ) ),
                             kv( "imageid", m( kv( "type", "INTEGER" ) ) ),   // ID of the post's featured image.
-                            kv( "location", m( kv( "type", "STRING" ) ) ),    // The post's location; packaged, downloaded or server.
-                            kv( "url", m( kv( "type", "STRING" ) ) ),    // The post's WP URL.
-                            kv( "filename", m( kv( "type", "TEXT" ) ) ),      // Name of associated media file (i.e. for attachments)
-                            kv( "parent", m( kv( "type", "INTEGER" ) ) ),   // ID of parent page/post.
-                            kv( "menu_order", m( kv( "type", "INTEGER" ) ) )    // Sort order; mapped to post.menu_order.
+                            kv( "location", m( kv( "type", "STRING" ) ) ),   // The post's location; packaged, downloaded or server.
+                            kv( "url", m( kv( "type", "STRING" ) ) ),        // The post's WP URL.
+                            kv( "filename", m( kv( "type", "TEXT" ) ) ),     // Name of associated media file (i.e. for attachments)
+                            kv( "parent", m( kv( "type", "INTEGER" ) ) ),    // ID of parent page/post.
+                            kv( "menu_order", m( kv( "type", "INTEGER" ) ) ) // Sort order; mapped to post.menu_order.
                         ) )
                     ) ),
                     // Table of parent/child post closures. Used to efficiently map descendant post relationships.
@@ -286,7 +286,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         return result;
     }
 
-    /** Return data for a specified post. */
+    /**
+     * Return data for a specified post.
+     * TODO: Confirm that 'params' isn't needed here? (Compare to iOS code).
+     */
     public Object getPost(String postID, Map<String,Object> params) {
         // Read the post data.
         Map<String,Object> postData = postDB.read("posts", postID );

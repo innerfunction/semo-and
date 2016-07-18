@@ -105,12 +105,9 @@ public class CommandScheduler {
         // Command database setup.
         db = new DB();
         db.setName("com.innerfunction.semo.command-scheduler");
-        db.setVersion( 0 );
-        // public void setTables(Table... tables)
-        db.setTables(
-            // public Table(String name, Column... columns)
+        db.setVersion( 1 );
+        db.setTableSchema(
             new Table("queue",
-                // public Column(String name, String type, String tag)
                 new Column("id",     "INTEGER PRIMARY KEY", "id"),
                 new Column("batch",  "INTEGER"),
                 new Column("command","TEXT"),

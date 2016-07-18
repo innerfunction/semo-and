@@ -14,6 +14,7 @@
 package com.innerfunction.semo.db;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by juliangoacher on 09/05/16.
@@ -36,9 +37,19 @@ public class Table {
     public void setName(String name) {
         this.name = name;
     }
-
+/*
     public void setColumns(List<Column> columns) {
         this.columns = columns.toArray( new Column[columns.size()] );
+    }
+*/
+    public void setColumns(Map<String,Column> columns) {
+        this.columns = new Column[columns.size()];
+        int idx = 0;
+        for( String name : columns.keySet() ) {
+            Column column = columns.get( name );
+            column.setName( name );
+            this.columns[idx++] = column;
+        }
     }
 
     public void setSince(int since) {

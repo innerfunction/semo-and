@@ -56,9 +56,9 @@ public class DB implements Service, IOCContextAware {
     /** A helper for managing database initializations and upgrades. */
     private DBHelper helper;
     /** A map of tagged column names, by table. */
-    private Map<String,Map<String,String>> taggedTableColumns;
+    private Map<String,Map<String,String>> taggedTableColumns = new HashMap<>();
     /** A map of column names, by table. */
-    private Map<String,Set<String>> tableColumnNames;
+    private Map<String,Set<String>> tableColumnNames = new HashMap<>();
     /** The database name. */
     private String name;
     /** The current database schema version number. */
@@ -70,7 +70,7 @@ public class DB implements Service, IOCContextAware {
 
     public DB() {
         this.name = "semo";
-        this.version = 0;
+        this.version = 1;
         this.tables = new HashMap<>();
         this.resetDatabase = false;
     }
@@ -79,6 +79,7 @@ public class DB implements Service, IOCContextAware {
         this.name = parent.name;
         this.version = parent.version;
         this.tables = parent.tables;
+        this.androidContext = parent.androidContext;
     }
 
     // IOCContextAware
@@ -105,9 +106,7 @@ public class DB implements Service, IOCContextAware {
         return version;
     }
 
-    // TODO Update the container to convert List<X> => X[] (i.e. array of X)
-    // TODO Also note that iOS code accepts a map at this point (should be called schema?)
-    public void setTables(Table... tables) {
+    public void setTableSchema(Table... tables) {
         for( Table table : tables ) {
             Map<String,String> columnTags = new HashMap<>();
             Set<String> columnNames = new HashSet<>();
@@ -121,6 +120,10 @@ public class DB implements Service, IOCContextAware {
             tableColumnNames.put( table.name, columnNames );
             this.tables.put( table.name, table );
         }
+    }
+
+    public void setTables(Map<String,Table> tables) {
+        this.tables = tables;
     }
 
     public Map<String,Table> getTables() {
