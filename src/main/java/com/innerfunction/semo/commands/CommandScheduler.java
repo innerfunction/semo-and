@@ -13,8 +13,10 @@
 // limitations under the License
 package com.innerfunction.semo.commands;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.innerfunction.pttn.Service;
 import com.innerfunction.q.Q;
 import com.innerfunction.semo.db.Column;
 import com.innerfunction.semo.db.DB;
@@ -35,7 +37,7 @@ import java.util.Map;
  *
  * Created by juliangoacher on 07/05/16.
  */
-public class CommandScheduler {
+public class CommandScheduler implements Service {
 
     static final String Tag = CommandScheduler.class.getSimpleName();
 
@@ -84,7 +86,7 @@ public class CommandScheduler {
         CommandItem() {}
         /** Instantiate a new command item from a db record. */
         CommandItem(Map<String,?> record) {
-            this.rowID = (String)record.get("id");
+            this.rowID = record.get("id").toString();
             this.name = (String)record.get("command");
             try {
                 String json = (String)record.get("args");
@@ -101,9 +103,10 @@ public class CommandScheduler {
         }
     }
 
-    public CommandScheduler() {
+    public CommandScheduler(Context androidContext) {
         // Command database setup.
         db = new DB();
+        db.setAndroidContext( androidContext );
         db.setName("com.innerfunction.semo.command-scheduler");
         db.setVersion( 1 );
         db.setTableSchema(
@@ -404,4 +407,15 @@ public class CommandScheduler {
         return null;
     }
 
+    @Override
+    public void startService() {
+        db.startService();
+        // Execute any commands left on the queue from previous start.
+        executeQueue();
+    }
+
+    @Override
+    public void stopService() {
+        db.stopService();
+    }
 }
