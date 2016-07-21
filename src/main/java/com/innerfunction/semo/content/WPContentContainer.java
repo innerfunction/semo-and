@@ -542,17 +542,20 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         configureWith( componentConfig );
 
         // Configure the command scheduler.
-        commandScheduler.setQueueDBName( String.format("%s.scheduler", postDBName ) );
-        if( contentProtocol != null ) {
-            commandScheduler.setCommand("content", contentProtocol );
+        if( commandScheduler != null ) {
+            commandScheduler.setQueueDBName( String.format( "%s.scheduler", postDBName ) );
+            if( contentProtocol != null ) {
+                commandScheduler.setCommand( "content", contentProtocol );
+            }
+
+            GetURLCommand getCmd = new GetURLCommand( httpClient );
+            getCmd.setMaxRequestsPerMinute( 30.0f );
+            commandScheduler.setCommand( "get", getCmd );
+
+            DownloadZipCommand dlzipCmd = new DownloadZipCommand( httpClient, commandScheduler );
+            commandScheduler.setCommand( "dlzip", dlzipCmd );
         }
-
-        GetURLCommand getCmd = new GetURLCommand( httpClient );
-        getCmd.setMaxRequestsPerMinute( 30.0f );
-        commandScheduler.setCommand("get", getCmd );
-
-        DownloadZipCommand dlzipCmd = new DownloadZipCommand( httpClient, commandScheduler );
-        commandScheduler.setCommand("dlzip", dlzipCmd );
+        else Log.w( Tag, "commandScheduler not found");
     }
 
     // MessageReceiver
