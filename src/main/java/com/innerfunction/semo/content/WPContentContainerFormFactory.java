@@ -231,9 +231,9 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
         Map<String,Object> params = Maps.extend( StdParams );
         params.put("SubmitURL",     submitURL );
         params.put("IsEnabled",     isEnabled );
-        params.put("Fields",        Null.valueOrPlaceholder( configuration.getValue("fields") ) );
-        params.put("TitleStyle",    Null.valueOrPlaceholder( configuration.getValue("titleStyle") ) );
-        params.put("InputStyle",    Null.valueOrPlaceholder( configuration.getValue("inputStyle") ) );
+        params.put("Fields",        Null.valueOrPlaceholder( configuration.getRawValue("fields") ) );
+        params.put("TitleStyle",    Null.valueOrPlaceholder( configuration.getRawValue("titleStyle") ) );
+        params.put("InputStyle",    Null.valueOrPlaceholder( configuration.getRawValue("inputStyle") ) );
 
         // Create the form configuration.
         configuration = configuration.configurationWithKeysExcluded("*factory", "formType", "fields");
