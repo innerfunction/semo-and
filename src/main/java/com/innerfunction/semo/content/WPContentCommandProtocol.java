@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by juliangoacher on 07/07/16.
+ * Attached by juliangoacher on 07/07/16.
  */
 public class WPContentCommandProtocol extends CommandProtocol {
 

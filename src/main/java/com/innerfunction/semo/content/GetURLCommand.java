@@ -36,7 +36,7 @@ import java.util.List;
  *              each failed attempt. The command fails once maxRetries number of attempts has been
  *              made.
  *
- * Created by juliangoacher on 11/07/16.
+ * Attached by juliangoacher on 11/07/16.
  */
 public class GetURLCommand implements Command {
 

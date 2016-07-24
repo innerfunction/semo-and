@@ -25,7 +25,7 @@ import java.util.List;
  * - zip:   The path to a zip archive file.
  * - to:    The path to a directory to unzip the archive's contents into.
  *
- * Created by juliangoacher on 13/05/16.
+ * Attached by juliangoacher on 13/05/16.
  */
 public class UnzipCommand implements Command {
 

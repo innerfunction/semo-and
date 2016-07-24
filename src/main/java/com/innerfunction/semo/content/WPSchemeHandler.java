@@ -44,7 +44,7 @@ import java.util.Map;
  *                              - all: Return only posts containing all of the words.
  *                              - exact: Return only posts containing the exact phrase.
  *
- * Created by juliangoacher on 07/07/16.
+ * Attached by juliangoacher on 07/07/16.
  */
 public class WPSchemeHandler implements URIScheme {
 

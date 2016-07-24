@@ -18,7 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 /**
- * Created by juliangoacher on 25/05/16.
+ * Attached by juliangoacher on 25/05/16.
  */
 public class FormSubmitFieldView extends FormFieldView implements FormView.LoadingIndicator {
 

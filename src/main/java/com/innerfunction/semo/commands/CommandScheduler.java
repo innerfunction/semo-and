@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * A command scheduler with guarantees on command execution.
  *
- * Created by juliangoacher on 07/05/16.
+ * Attached by juliangoacher on 07/05/16.
  */
 public class CommandScheduler implements Service {
 

@@ -13,7 +13,7 @@ import static com.innerfunction.semo.commands.CommandScheduler.CommandItem;
  * A command implementation that supports multiple different named commands, useful for
  * defining protocols composed of a number of related commands.
  *
- * Created by juliangoacher on 13/05/16.
+ * Attached by juliangoacher on 13/05/16.
  */
 public class CommandProtocol implements Command {
 

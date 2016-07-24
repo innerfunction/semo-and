@@ -16,7 +16,7 @@ package com.innerfunction.semo.form;
 import android.content.Context;
 
 /**
- * Created by juliangoacher on 21/05/16.
+ * Attached by juliangoacher on 21/05/16.
  */
 public class FormHiddenFieldView extends FormFieldView {
 

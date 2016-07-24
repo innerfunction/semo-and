@@ -40,7 +40,7 @@ import java.util.List;
  * - url:       The URL to download.
  * - path:      A location to unzip the downloaded zip file to.
  *
- * Created by juliangoacher on 11/07/16.
+ * Attached by juliangoacher on 11/07/16.
  */
 public class DownloadZipCommand implements Command {
 

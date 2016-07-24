@@ -14,7 +14,7 @@
 package com.innerfunction.semo.db;
 
 /**
- * Created by juliangoacher on 09/05/16.
+ * Attached by juliangoacher on 09/05/16.
  */
 public class Column {
 

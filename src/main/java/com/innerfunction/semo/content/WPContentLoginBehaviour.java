@@ -9,7 +9,7 @@ import com.innerfunction.pttn.app.ViewControllerBehaviour;
  * If a user is logged in then posts an action message. Useful for skipping the login form at
  * startup.
  *
- * Created by juliangoacher on 12/07/16.
+ * Attached by juliangoacher on 12/07/16.
  */
 public class WPContentLoginBehaviour implements ViewControllerBehaviour {
 

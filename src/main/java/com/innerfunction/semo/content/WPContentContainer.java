@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * A container for Wordpress sourced content.
  *
- * Created by juliangoacher on 29/05/16.
+ * Attached by juliangoacher on 29/05/16.
  */
 public class WPContentContainer extends Container implements IOCContainerAware, MessageReceiver {
 

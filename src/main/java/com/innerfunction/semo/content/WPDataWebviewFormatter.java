@@ -18,7 +18,7 @@ import java.util.Map;
 import static com.innerfunction.util.DataLiterals.*;
 
 /**
- * Created by juliangoacher on 07/07/16.
+ * Attached by juliangoacher on 07/07/16.
  */
 public class WPDataWebviewFormatter implements DataFormatter {
 

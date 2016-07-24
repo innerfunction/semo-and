@@ -36,7 +36,7 @@ import java.util.Set;
  * with URLs referencing the attachment file in its current location, and to replace
  * post references with appropriate URIs.
  *
- * Created by juliangoacher on 07/07/16.
+ * Attached by juliangoacher on 07/07/16.
  */
 public class WPClientTemplateContext implements IOCContainerAware {
 

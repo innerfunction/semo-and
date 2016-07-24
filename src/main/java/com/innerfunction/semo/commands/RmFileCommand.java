@@ -24,7 +24,7 @@ import java.util.List;
  * Arguments: <path> [path...]
  * - path:  One or more paths to a file or directory to remove.
  *
- * Created by juliangoacher on 13/05/16.
+ * Attached by juliangoacher on 13/05/16.
  */
 public class RmFileCommand implements Command {
 

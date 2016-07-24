@@ -14,7 +14,7 @@
 package com.innerfunction.semo.content;
 
 /**
- * Created by juliangoacher on 07/07/16.
+ * Attached by juliangoacher on 07/07/16.
  */
 public interface DataFormatter {
 

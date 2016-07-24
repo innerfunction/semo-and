@@ -21,7 +21,7 @@ import static com.innerfunction.semo.commands.CommandScheduler.CommandItem;
 /**
  * A schedulable command.
  *
- * Created by juliangoacher on 07/05/16.
+ * Attached by juliangoacher on 07/05/16.
  */
 public interface Command {
 

@@ -37,7 +37,7 @@ import java.util.Map;
 
 /**
  * A class for managing user authentication via Wordpress login and registration.
- * Created by juliangoacher on 08/07/16.
+ * Attached by juliangoacher on 08/07/16.
  */
 public class WPAuthManager implements AuthenticationDelegate {
 

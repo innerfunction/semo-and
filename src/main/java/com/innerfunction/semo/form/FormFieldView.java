@@ -24,7 +24,7 @@ import com.innerfunction.pttn.app.AppContainer;
 import java.util.List;
 
 /**
- * Created by juliangoacher on 14/05/16.
+ * Attached by juliangoacher on 14/05/16.
  */
 public class FormFieldView extends LinearLayout {
 

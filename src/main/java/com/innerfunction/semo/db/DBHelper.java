@@ -26,7 +26,7 @@ import android.util.Log;
 
 
 /**
- * Created by juliangoacher on 09/05/16.
+ * Attached by juliangoacher on 09/05/16.
  */
 public class DBHelper extends SQLiteOpenHelper {
 

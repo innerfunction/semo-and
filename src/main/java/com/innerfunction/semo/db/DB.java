@@ -35,7 +35,7 @@ import java.util.Set;
  * A SQL database wrapper.
  * Provides methods for performing DB operations - queries, inserts, updates & deletes.
  *
- * Created by juliangoacher on 09/05/16.
+ * Attached by juliangoacher on 09/05/16.
  */
 public class DB implements Service, IOCContextAware {
 

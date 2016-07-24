@@ -25,7 +25,7 @@ import java.util.List;
  * - from:  The file path to move.
  * - to:    Where to move the file or directory to.
  *
- * Created by juliangoacher on 13/05/16.
+ * Attached by juliangoacher on 13/05/16.
  */
 public class MvFileCommand implements Command {
 

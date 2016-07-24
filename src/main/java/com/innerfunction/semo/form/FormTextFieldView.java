@@ -18,7 +18,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.widget.EditText;
 
 /**
- * Created by juliangoacher on 28/05/16.
+ * Attached by juliangoacher on 28/05/16.
  */
 public class FormTextFieldView extends FormFieldView {
 

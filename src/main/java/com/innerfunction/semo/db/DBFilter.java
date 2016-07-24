@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by juliangoacher on 01/06/16.
+ * Attached by juliangoacher on 01/06/16.
  */
 public class DBFilter {
 

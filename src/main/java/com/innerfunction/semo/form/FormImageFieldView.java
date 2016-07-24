@@ -20,7 +20,7 @@ import android.view.Gravity;
 import android.widget.ImageView;
 
 /**
- * Created by juliangoacher on 23/05/16.
+ * Attached by juliangoacher on 23/05/16.
  */
 public class FormImageFieldView extends FormFieldView {
 
