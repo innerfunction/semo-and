@@ -27,7 +27,7 @@ import java.util.Map;
  */
 public class DBFilter {
 
-    private List<String> paramNames;
+    private List<String> paramNames = new ArrayList<>();
     private String sql;
     private String table;
     private Map<String,Object> filters;
@@ -43,7 +43,7 @@ public class DBFilter {
             List<String> terms = new ArrayList<>();
             terms.add("SELECT * FROM");
             terms.add( table );
-            if( this.filters != null ) {
+            if( filters != null && filters.size() > 0 ) {
                 terms.add("WHERE");
                 // Regex pattern for detecting filter values that contain a predicate.
                 Regex predicatePattern = new Regex("^\\s*(=|<|>|LIKE\\s|NOT\\s)");
@@ -112,7 +112,7 @@ public class DBFilter {
 
     public void setSql(String sql) {
         // Extract parameter names from the SQL string. Parameter names appear as ?xxx in the SQL.
-        paramNames = new ArrayList<>();
+        paramNames.clear();
         Regex re = new Regex("\\?(\\w+)(.*)");
         String groups[] = re.matches( sql );
         while( groups.length > 0 ) {

@@ -51,7 +51,7 @@ public class WPAuthManager implements AuthenticationDelegate {
 
     public WPAuthManager(WPContentContainer container) {
         this.container = container;
-        this.wpRealm = container.getWPRealm();
+        this.wpRealm = container.getWpRealm();
         this.feedURL = container.getFeedURL();
         this.profileFieldNames = Arrays.asList("ID", "first_name", "last_name", "user_email");
         this.userDefaults = AppContainer.getAppContainer().getUserDefaults();

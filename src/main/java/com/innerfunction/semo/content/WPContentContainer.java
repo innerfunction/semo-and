@@ -349,7 +349,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
                 String paramValue = KeyPath.getValueAsString( paramName, params );
                 // Check for a comparison suffix on the name.
                 String[] groups = re.matches( paramName );
-                if( groups.length > 1 ) {
+                if( groups != null && groups.length > 1 ) {
                     fieldName = groups[0];
                     String comparison = groups[1];
                     if( "min".equals( comparison ) ) {
@@ -633,15 +633,15 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.contentPath = path;
     }
 
-    public void setURISchemeName(String name) {
+    public void setUriSchemeName(String name) {
         this.uriSchemeName = name;
     }
 
-    public void setWPRealm(String realm) {
+    public void setWpRealm(String realm) {
         this.wpRealm = realm;
     }
 
-    public String getWPRealm() {
+    public String getWpRealm() {
         return wpRealm;
     }
 
@@ -669,8 +669,12 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.contentProtocol = protocol;
     }
 
-    public void setURIScheme(WPSchemeHandler scheme) {
+    public void setUriScheme(WPSchemeHandler scheme) {
         this.uriScheme = scheme;
+    }
+
+    public WPSchemeHandler getUriScheme() {
+        return uriScheme;
     }
 
     public void setListFormats(Map<String,DataFormatter> formats) {

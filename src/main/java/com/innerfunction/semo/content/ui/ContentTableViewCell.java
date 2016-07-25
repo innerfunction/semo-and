@@ -25,7 +25,7 @@ import com.nakardo.atableview.view.ATableViewCell;
 public class ContentTableViewCell extends ATableViewCell {
 
     public ContentTableViewCell(ATableViewCell.ATableViewCellStyle style, String reuseIdentifier, Context context) {
-        super( reuseIdentifier.equals("content") ? ATableViewCell.ATableViewCellStyle.Subtitle : ATableViewCell.ATableViewCellStyle.Default, reuseIdentifier, context );
+        super( style, reuseIdentifier, context );
     }
 
     public void setTitle(String title) {

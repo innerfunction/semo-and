@@ -16,11 +16,17 @@ package com.innerfunction.semo.content.ui;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.pttn.ui.table.TableViewCellFactory;
 import com.innerfunction.pttn.ui.table.TableViewController;
 import com.innerfunction.semo.content.DataFormatter;
+import com.innerfunction.util.StringTemplate;
 import com.innerfunction.util.ValueMap;
 import com.nakardo.atableview.foundation.NSIndexPath;
 import com.nakardo.atableview.internal.ATableViewCellAccessoryView;
+import com.nakardo.atableview.protocol.ATableViewDataSource;
+import com.nakardo.atableview.protocol.ATableViewDelegate;
+import com.nakardo.atableview.view.ATableViewCell;
 
 import java.util.Map;
 
@@ -35,6 +41,7 @@ public class ContentTableViewController extends TableViewController {
     private int rowImageWidth;
     private String action;
     private boolean showRowContent;
+    private ContentTableViewCell layoutCell;
 
     public ContentTableViewController(Context context) {
         super( context );
@@ -77,6 +84,80 @@ public class ContentTableViewController extends TableViewController {
         else {
             cell.setAccessoryType( ATableViewCellAccessoryView.ATableViewCellAccessoryType.None );
         }
+    }
+
+    protected String getReuseID() {
+        return showRowContent ? "content" : "title";
+    }
+
+    protected ContentTableViewCell makeTableViewCell(String reuseID) {
+        ATableViewCell.ATableViewCellStyle style = reuseID.equals("content")
+            ? ATableViewCell.ATableViewCellStyle.Subtitle
+            : ATableViewCell.ATableViewCellStyle.Default;
+        return new ContentTableViewCell( style, reuseID, getContext() );
+    }
+
+    @Override
+    protected ATableViewDataSource makeDataSource() {
+        return new ATableViewDataSource() {
+            @Override
+            public int numberOfSectionsInTableView(com.nakardo.atableview.view.ATableView tableView) {
+                return tableData.getSectionCount();
+            }
+            @Override
+            public int numberOfRowsInSection(com.nakardo.atableview.view.ATableView tableView, int section) {
+                return tableData.getSectionSize( section );
+            }
+            @Override
+            public String titleForHeaderInSection(com.nakardo.atableview.view.ATableView tableView, int section) {
+                return tableData.getSectionTitle( section );
+            }
+            @Override
+            public ATableViewCell cellForRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
+                String reuseID = getReuseID();
+                ATableViewCell cell = dequeueReusableCellWithIdentifier( reuseID );
+                if( cell instanceof ContentTableViewCell ) {
+                    configureCell( (ContentTableViewCell)cell, indexPath );
+                }
+                else {
+                    ContentTableViewCell ctvCell = makeTableViewCell( reuseID );
+                    configureCell( ctvCell, indexPath );
+                    cell = ctvCell;
+                }
+                return cell;
+            }
+        };
+    }
+
+    @Override
+    protected ATableViewDelegate makeDelegate() {
+        return new ATableViewDelegate() {
+            @Override
+            public void didSelectRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
+                ValueMap rowData = tableData.getRowDataForIndexPath( indexPath );
+                String action = rowData.getString("action");
+                String _action = ContentTableViewController.this.action;
+                if( action == null && _action != null ) {
+                    // If no action on cell data, but action defined on table then eval as a
+                    // template on the cell data.
+                    action = StringTemplate.render( _action, rowData );
+                }
+                if( action != null ) {
+                    AppContainer.getAppContainer().postMessage( action, ContentTableViewController.this );
+                    tableData.clearFilter();
+                }
+            }
+            @Override
+            public int heightForRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
+                if( layoutCell == null ) {
+                    layoutCell = makeTableViewCell( getReuseID() );
+                    layoutCell.setVisibility( INVISIBLE );
+                    addView( layoutCell );
+                }
+                configureCell( layoutCell, indexPath );
+                return layoutCell.getCellHeight();
+            }
+        };
     }
 
     public void setDataFormatter(DataFormatter dataFormatter) {
