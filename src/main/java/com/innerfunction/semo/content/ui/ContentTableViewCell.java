@@ -1,0 +1,64 @@
+// Copyright 2016 InnerFunction Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License
+package com.innerfunction.semo.content.ui;
+
+import android.content.Context;
+import android.text.Html;
+import android.widget.TextView;
+
+import com.nakardo.atableview.view.ATableViewCell;
+
+/**
+ * Created by juliangoacher on 25/07/16.
+ */
+public class ContentTableViewCell extends ATableViewCell {
+
+    public ContentTableViewCell(ATableViewCell.ATableViewCellStyle style, String reuseIdentifier, Context context) {
+        super( reuseIdentifier.equals("content") ? ATableViewCell.ATableViewCellStyle.Subtitle : ATableViewCell.ATableViewCellStyle.Default, reuseIdentifier, context );
+    }
+
+    public void setTitle(String title) {
+        getTextLabel().setText( title );
+    }
+
+    public String getTitle() {
+        return getTextLabel().getText().toString();
+    }
+
+    public void setContent(String content) {
+        TextView label = getDetailTextLabel();
+        if( label != null ) {
+            label.setText( Html.fromHtml( content ) );
+            int height = label.getLineHeight() * label.getLineCount();
+            label.setHeight( height );
+        }
+    }
+
+    public String getContent() {
+        TextView label = getDetailTextLabel();
+        if( label != null ) {
+            return label.getText().toString();
+        }
+        return "";
+    }
+
+    public int getCellHeight() {
+        TextView label = getDetailTextLabel();
+        if( label != null ) {
+            return label.getHeight();
+        }
+        return getTextLabel().getHeight();
+    }
+
+}
