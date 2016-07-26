@@ -14,8 +14,18 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
+import android.view.Gravity;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
+
+import com.innerfunction.semo.R;
 
 /**
  * Attached by juliangoacher on 28/05/16.
@@ -26,13 +36,39 @@ public class FormTextFieldView extends FormFieldView {
     private boolean isPassword = false;
     private boolean isEditable = true;
     private boolean isRequired = false;
+    private boolean isSelected = false;
     private String hasSameValueAs;
     private EditText input;
     private String valueLabel;
+    private LinearLayout inputLayout;
 
     public FormTextFieldView(Context context) {
         super( context );
         setIsInput( true );
+
+        this.inputLayout = new LinearLayout( context );
+        inputLayout.setGravity( Gravity.LEFT );
+        LayoutParams editLayoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
+        editLayoutParams.setMargins( 20, 20, 20, 20 );
+        inputLayout.setLayoutParams( editLayoutParams );
+
+        EditText input = new EditText( context );
+        input.setTextColor( Color.BLACK );
+        input.setHintTextColor( Color.GRAY );
+        input.setSingleLine();
+        input.setInputType( InputType.TYPE_CLASS_TEXT );
+        setInput( input );
+    }
+
+    public EditText getInput() {
+        return input;
+    }
+
+    public void setInput(EditText input) {
+        this.input = input;
+        input.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+        inputLayout.removeAllViews();
+        inputLayout.addView( input );
     }
 
     @Override
@@ -86,18 +122,48 @@ public class FormTextFieldView extends FormFieldView {
         validate();
     }
 
+    public
     @Override
     public boolean takeFieldFocus() {
         boolean focusable = isEditable && getForm().isEnabled();
         if( focusable ) {
-            // TODO Animate transition to edit view
+            isSelected = true;
+            // Animate transition to edit view.
+            removeView( cellLayout );
+            addView( inputLayout );
+            YoYo.with( Techniques.FlipInX ).duration( 600 ).playOn( this );
+            // Focus input and show keyboard after transition.
+            this.post(new Runnable() {
+                @Override
+                public void run() {
+                    inputLayout.postDelayed( new Runnable() {
+                        @Override
+                        public void run() {
+                            inputLayout.requestFocus();
+                            InputMethodManager keyboard
+                                = (InputMethodManager)getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
+                            keyboard.showSoftInput( inputLayout, 0 );
+                        }
+                    }, 1000);
+                }
+            });
         }
         return focusable;
     }
 
     @Override
     public void releaseFieldFocus() {
-        // TODO
+        if( isSelected ) {
+            isSelected = false;
+            removeView( inputLayout );
+            addView( cellLayout );
+            YoYo.with( Techniques.FlipInX ).duration( 600 ).playOn( this );
+            // Update the form data if the input value has changed.
+            String currentValue = input.getText().toString();
+            if( !currentValue.equals( originalValue ) ) {
+                getFormMenu().setDataValue( getName(), currentValue );
+            }
+        }
     }
 
     @Override
@@ -116,7 +182,12 @@ public class FormTextFieldView extends FormFieldView {
                 isValid = otherValue.equals( strValue );
             }
         }
-        // TODO Show warning if invalid
+        if( isValid ) {
+            setAccessoryView( null );
+        }
+        else {
+            showAccessoryImage( R.drawable.warning_icon, 50, 50 );
+        }
         return isValid;
     }
 }

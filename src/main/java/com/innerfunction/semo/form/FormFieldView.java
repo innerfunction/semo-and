@@ -16,17 +16,25 @@ package com.innerfunction.semo.form;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.semo.R;
 
 import java.util.List;
 
 /**
  * Attached by juliangoacher on 14/05/16.
  */
-public class FormFieldView extends LinearLayout {
+public class FormFieldView extends /*LinearLayout*/ FrameLayout {
 
     static final int DefaultHeight = 45;
 
@@ -58,12 +66,59 @@ public class FormFieldView extends LinearLayout {
     private TextView titleLabel;
     /** A list of all the fields in this field's group. */
     private List<FormFieldView> fieldGroup;
+    /** The cell's layout container. */
+    protected View cellLayout;
+    /** The main panel of the field layout. A left-aligned, vertically centered panel. */
+    private LinearLayout mainPanel;
+    /** The right side panel of the field layout. */
+    private LinearLayout accessoryPanel;
 
     public FormFieldView(Context context) {
         super( context );
+
+        LayoutParams layoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
+        layoutParams.setMargins( 20, 20, 20, 20 );
+        setLayoutParams( layoutParams );
+
+        LayoutInflater inflater = LayoutInflater.from( context );
+        this.cellLayout = inflater.inflate( R.layout.formfield_cell_layout, this, false );
+        this.addView( cellLayout );
+
+        LinearLayout mainPanelParent = (LinearLayout)cellLayout.findViewById( R.id.main_panel );
+        mainPanelParent.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT ) );
+        mainPanelParent.setGravity( Gravity.START|Gravity.CENTER_VERTICAL );
+        // this layout allows to wrap the content ante center vertically in the parent.
+        // Required when an image larger that the cell height is placed in the right cell, this layout makes the text center vertically
+        this.mainPanel = new LinearLayout( context );
+        mainPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
+        mainPanel.setBackgroundColor( Color.TRANSPARENT );
+        mainPanelParent.addView( mainPanel );
+
+        LinearLayout accessoryPanelParent = (LinearLayout)cellLayout.findViewById( R.id.accessory_panel );
+        accessoryPanelParent.setGravity( Gravity.END|Gravity.CENTER_VERTICAL );
+        // the layout to center vertically the image. A layout is required to call the setGravity method.
+        this.accessoryPanel = new LinearLayout( context );
+        accessoryPanel.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
+        accessoryPanel.setGravity( Gravity.END|Gravity.CENTER_VERTICAL );
+        accessoryPanelParent.addView( accessoryPanel );
+
         this.titleLabel = new TextView( context );
         titleLabel.setLayoutParams( new LinearLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
-        addView( titleLabel );
+        setMainView( titleLabel );
+    }
+
+    public void setMainView(View view) {
+        mainPanel.removeAllViews();
+        if( view != null ) {
+            mainPanel.addView( view );
+        }
+    }
+
+    public void setAccessoryView(View view) {
+        accessoryPanel.removeAllViews();
+        if( view != null ) {
+            accessoryPanel.addView( view );
+        }
     }
 
     public boolean takeFieldFocus() {
@@ -87,6 +142,27 @@ public class FormFieldView extends LinearLayout {
         if( selectAction != null ) {
             AppContainer.getAppContainer().postMessage( selectAction, this );
         }
+    }
+
+    public void showDisclosureIndicator() {
+        showAccessoryImage( R.drawable.right_arrow, 50, 50 );
+    }
+
+    public void showAccessoryImage(int imageID, int width, int height) {
+        Drawable image = ContextCompat.getDrawable( getContext(), imageID );
+        showAccessoryImage( image, 50, 50 );
+    }
+
+    public void showAccessoryImage(Drawable image, int width, int height) {
+        ImageView imageView = new ImageView( getContext() );
+        imageView.setScaleType( ImageView.ScaleType.CENTER_CROP );
+        imageView.setImageDrawable( image );
+        // Set the image size
+        imageView.setLayoutParams( new LayoutParams( width, height ) );
+        mainPanel.setPadding( 10, 10, 10, 10 );
+        mainPanel.setGravity( Gravity.END );
+
+        setAccessoryView( imageView );
     }
 
     // Properties
