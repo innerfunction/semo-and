@@ -32,8 +32,8 @@ public class FormImageFieldView extends FormFieldView {
         this.imageView = new ImageView( context );
         imageView.setScaleType( ImageView.ScaleType.CENTER_INSIDE );
         imageView.setBackgroundColor( Color.TRANSPARENT );
-        addView( imageView );
-        setGravity( Gravity.CENTER );
+        // setGravity( Gravity.CENTER );
+        setMainView( imageView );
     }
 
     public void setImage(Drawable image) {

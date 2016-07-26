@@ -18,9 +18,12 @@ import android.graphics.Color;
 import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
@@ -65,10 +68,32 @@ public class FormTextFieldView extends FormFieldView {
     }
 
     public void setInput(EditText input) {
-        this.input = input;
-        input.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
-        inputLayout.removeAllViews();
-        inputLayout.addView( input );
+        if( this.input != input ) {
+            this.input = input;
+            input.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+            inputLayout.removeAllViews();
+            inputLayout.addView( input );
+
+            //input.setRawInputType( InputType.TYPE_CLASS_TEXT );
+            // Return key behaviour - see http://stackoverflow.com/questions/1489852/android-handle-enter-in-an-edittext
+            input.setImeOptions( EditorInfo.IME_ACTION_GO );
+            input.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                    if( actionId == EditorInfo.IME_NULL ) {
+                        int action = event.getAction();
+                        if( action == KeyEvent.ACTION_DOWN ) {
+                            return true;
+                        }
+                        if( action == KeyEvent.ACTION_UP ) {
+                            getForm().moveFocusToNextField();
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
@@ -98,6 +123,11 @@ public class FormTextFieldView extends FormFieldView {
 
     public void setValueLabel(String label) {
         this.valueLabel = label;
+        getValueLabel().setText( label );
+    }
+
+    public void setHasSameValueAs(String hasSameValueAs) {
+        this.hasSameValueAs = hasSameValueAs;
     }
 
     @Override
@@ -118,11 +148,9 @@ public class FormTextFieldView extends FormFieldView {
             strValue = sb.toString();
         }
         setValueLabel( strValue );
-        // TODO Display value
         validate();
     }
 
-    public
     @Override
     public boolean takeFieldFocus() {
         boolean focusable = isEditable && getForm().isEnabled();
@@ -158,11 +186,7 @@ public class FormTextFieldView extends FormFieldView {
             removeView( inputLayout );
             addView( cellLayout );
             YoYo.with( Techniques.FlipInX ).duration( 600 ).playOn( this );
-            // Update the form data if the input value has changed.
-            String currentValue = input.getText().toString();
-            if( !currentValue.equals( originalValue ) ) {
-                getFormMenu().setDataValue( getName(), currentValue );
-            }
+            setValue( input.getText().toString() );
         }
     }
 
@@ -170,9 +194,11 @@ public class FormTextFieldView extends FormFieldView {
     public boolean validate() {
         isValid = true;
         String strValue = (String)getValue();
+        // Check that field has a value if required.
         if( isRequired && (strValue == null || strValue.trim().length() == 0) ) {
             isValid = false;
         }
+        // Otherwise check value is same as another field, if specified.
         else if( hasSameValueAs != null ) {
             Object otherValue = getForm().getFieldValue( hasSameValueAs );
             if( otherValue == null ) {
@@ -182,6 +208,7 @@ public class FormTextFieldView extends FormFieldView {
                 isValid = otherValue.equals( strValue );
             }
         }
+        // Show a warning icon if invalid, hide warning icon otherwise.
         if( isValid ) {
             setAccessoryView( null );
         }

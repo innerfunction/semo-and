@@ -693,6 +693,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.formFactory = factory;
     }
 
+    public WPContentContainerFormFactory getFormFactory() {
+        return formFactory;
+    }
+
     public void setFilters(Map filters) {
         this.filters = filters;
     }

@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.innerfunction.pttn.app.AppContainer;
@@ -64,14 +65,18 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
     private String title;
     /** A text view used to display the field title. */
     private TextView titleLabel;
+    /** A text view used to display the field value. */
+    private TextView valueLabel;
     /** A list of all the fields in this field's group. */
     private List<FormFieldView> fieldGroup;
     /** The cell's layout container. */
     protected View cellLayout;
     /** The main panel of the field layout. A left-aligned, vertically centered panel. */
-    private LinearLayout mainPanel;
+    private FrameLayout mainPanel;
     /** The right side panel of the field layout. */
-    private LinearLayout accessoryPanel;
+    private FrameLayout accessoryPanel;
+    /** The panel containing the field labels. */
+    private RelativeLayout labelPanel;
 
     public FormFieldView(Context context) {
         super( context );
@@ -84,27 +89,28 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
         this.cellLayout = inflater.inflate( R.layout.formfield_cell_layout, this, false );
         this.addView( cellLayout );
 
-        LinearLayout mainPanelParent = (LinearLayout)cellLayout.findViewById( R.id.main_panel );
-        mainPanelParent.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT ) );
-        mainPanelParent.setGravity( Gravity.START|Gravity.CENTER_VERTICAL );
+        this.mainPanel = (FrameLayout)cellLayout.findViewById( R.id.main_panel );
+        this.accessoryPanel = (FrameLayout)cellLayout.findViewById( R.id.accessory_panel );
+
         // this layout allows to wrap the content ante center vertically in the parent.
         // Required when an image larger that the cell height is placed in the right cell, this layout makes the text center vertically
-        this.mainPanel = new LinearLayout( context );
-        mainPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
-        mainPanel.setBackgroundColor( Color.TRANSPARENT );
-        mainPanelParent.addView( mainPanel );
-
-        LinearLayout accessoryPanelParent = (LinearLayout)cellLayout.findViewById( R.id.accessory_panel );
-        accessoryPanelParent.setGravity( Gravity.END|Gravity.CENTER_VERTICAL );
-        // the layout to center vertically the image. A layout is required to call the setGravity method.
-        this.accessoryPanel = new LinearLayout( context );
-        accessoryPanel.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
-        accessoryPanel.setGravity( Gravity.END|Gravity.CENTER_VERTICAL );
-        accessoryPanelParent.addView( accessoryPanel );
+        this.labelPanel = new RelativeLayout( context );
+        labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
+        labelPanel.setBackgroundColor( Color.TRANSPARENT );
 
         this.titleLabel = new TextView( context );
-        titleLabel.setLayoutParams( new LinearLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
-        setMainView( titleLabel );
+        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+        relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
+        titleLabel.setLayoutParams( relParams );
+        labelPanel.addView( titleLabel );
+
+        this.valueLabel = new TextView( context );
+        relParams = new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+        relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
+        valueLabel.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT ) );
+        labelPanel.addView( valueLabel );
+
+        setMainView( labelPanel );
     }
 
     public void setMainView(View view) {
@@ -133,15 +139,15 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
         return true;
     }
 
-    public void setSelectedStatus(boolean selected) {
-        setBackgroundColor( selected ? focusedBackgroundColor : backgroundColor );
-        // TODO: Background image.
-    }
-
     public void onSelectField() {
         if( selectAction != null ) {
             AppContainer.getAppContainer().postMessage( selectAction, this );
         }
+    }
+
+    public void setSelectedStatus(boolean selected) {
+        setBackgroundColor( selected ? focusedBackgroundColor : backgroundColor );
+        // TODO: Background image.
     }
 
     public void showDisclosureIndicator() {
@@ -159,9 +165,6 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
         imageView.setImageDrawable( image );
         // Set the image size
         imageView.setLayoutParams( new LayoutParams( width, height ) );
-        mainPanel.setPadding( 10, 10, 10, 10 );
-        mainPanel.setGravity( Gravity.END );
-
         setAccessoryView( imageView );
     }
 
@@ -226,5 +229,35 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
 
     public TextView getTitleLabel() {
         return titleLabel;
+    }
+
+    public void setTitleLabel(TextView label) {
+        if( titleLabel != label ) {
+            label.setLayoutParams( titleLabel.getLayoutParams() );
+            labelPanel.removeView( titleLabel );
+            labelPanel.addView( label, 0 );
+            titleLabel = label;
+        }
+    }
+
+    public TextView getValueLabel() {
+        return valueLabel;
+    }
+
+    public void setValueLabel(TextView label) {
+        if( valueLabel != label ) {
+            label.setLayoutParams( valueLabel.getLayoutParams() );
+            labelPanel.removeView( valueLabel );
+            labelPanel.addView( label, 1 );
+            valueLabel = label;
+        }
+    }
+
+    public void setFieldGroup(List<FormFieldView> fieldGroup) {
+        this.fieldGroup = fieldGroup;
+    }
+
+    public List<FormFieldView> getFieldGroup() {
+        return fieldGroup;
     }
 }

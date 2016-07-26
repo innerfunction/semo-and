@@ -51,7 +51,7 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
     );
     private static final Map<String, Object> StdParams = m(
         kv( "ImageField", m(
-            kv( "*ios-class", "IFFormImageField" )
+            kv( "*and-class", "com.innerfunction.semo.form.FormImageFieldView" )
         ) ),
         kv( "FirstnameField", m(
             kv( "*and-class", "com.innerfunction.semo.form.FormTextFieldView" ),
