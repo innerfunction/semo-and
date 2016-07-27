@@ -27,11 +27,9 @@ import com.innerfunction.http.Client;
 import com.innerfunction.http.Response;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.q.Q;
-import com.innerfunction.semo.commands.CommandScheduler;
 import com.innerfunction.util.Null;
 import com.innerfunction.util.StringTemplate;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,6 +111,9 @@ public class FormView extends ScrollView {
 
         setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
         addView( fieldLayout );
+
+        setBackgroundColor( Color.LTGRAY );
+
     }
 
     /** Set the form's HTTP client. */
@@ -140,6 +141,15 @@ public class FormView extends ScrollView {
     /** Get the currently focused field. */
     public FormFieldView getFocusedField() {
         return fields.get( focusedFieldIdx );
+    }
+
+    /** Set the currently focused field. Called by a field when it is clicked. */
+    protected void setFocusedField(FormFieldView field) {
+        clearFocusedField();
+        focusedFieldIdx = fields.indexOf( field );
+        field.setSelectedStatus( true );
+        field.takeFieldFocus();
+        field.onSelectField();
     }
 
     /** Clear the current field focus. */

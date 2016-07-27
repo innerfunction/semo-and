@@ -17,13 +17,14 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -35,7 +36,7 @@ import java.util.List;
 /**
  * Attached by juliangoacher on 14/05/16.
  */
-public class FormFieldView extends /*LinearLayout*/ FrameLayout {
+public class FormFieldView extends FrameLayout {
 
     static final int DefaultHeight = 45;
 
@@ -63,12 +64,13 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
     private Drawable focusedBackgroundImage;
     /** The field's title. */
     private String title;
-    /** A text view used to display the field title. */
-    private TextView titleLabel;
-    /** A text view used to display the field value. */
-    private TextView valueLabel;
+
     /** A list of all the fields in this field's group. */
     private List<FormFieldView> fieldGroup;
+    /** A text view used to display the field title. */
+    protected TextView titleLabel;
+    /** A text view used to display the field value. */
+    private TextView valueLabel;
     /** The cell's layout container. */
     protected View cellLayout;
     /** The main panel of the field layout. A left-aligned, vertically centered panel. */
@@ -76,7 +78,7 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
     /** The right side panel of the field layout. */
     private FrameLayout accessoryPanel;
     /** The panel containing the field labels. */
-    private RelativeLayout labelPanel;
+    private ViewGroup labelPanel;
 
     public FormFieldView(Context context) {
         super( context );
@@ -92,25 +94,41 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
         this.mainPanel = (FrameLayout)cellLayout.findViewById( R.id.main_panel );
         this.accessoryPanel = (FrameLayout)cellLayout.findViewById( R.id.accessory_panel );
 
-        // this layout allows to wrap the content ante center vertically in the parent.
-        // Required when an image larger that the cell height is placed in the right cell, this layout makes the text center vertically
-        this.labelPanel = new RelativeLayout( context );
+        this.labelPanel = makeLabelPanel( context );
+        this.valueLabel.setVisibility( INVISIBLE );
+        setMainView( labelPanel );
+
+        setOnClickListener( new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getForm().setFocusedField( FormFieldView.this );
+            }
+        });
+    }
+
+    protected ViewGroup makeLabelPanel(Context context) {
+        RelativeLayout labelPanel = new RelativeLayout( context );
         labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
         labelPanel.setBackgroundColor( Color.TRANSPARENT );
 
         this.titleLabel = new TextView( context );
-        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
         titleLabel.setLayoutParams( relParams );
+        titleLabel.setEllipsize( TextUtils.TruncateAt.END );
+        titleLabel.setSingleLine( true );
         labelPanel.addView( titleLabel );
 
         this.valueLabel = new TextView( context );
-        relParams = new RelativeLayout.LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+        relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
-        valueLabel.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT ) );
+        valueLabel.setLayoutParams( relParams );
+        valueLabel.setGravity( Gravity.END );
+        valueLabel.setEllipsize( TextUtils.TruncateAt.END );
+        valueLabel.setSingleLine( true );
         labelPanel.addView( valueLabel );
 
-        setMainView( labelPanel );
+        return labelPanel;
     }
 
     public void setMainView(View view) {
@@ -141,6 +159,7 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
 
     public void onSelectField() {
         if( selectAction != null ) {
+            // TODO: Message isn't routed because FormFieldView instance provides no way into container hierarchy.
             AppContainer.getAppContainer().postMessage( selectAction, this );
         }
     }
@@ -208,6 +227,11 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
 
     public void setHeight(int height) {
         this.height = height;
+        ViewGroup.LayoutParams layoutParams = getLayoutParams();
+        DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
+        float layoutHeight = height * dm.density * 1.0f;
+        layoutParams.height = (int)layoutHeight;
+        setLayoutParams( layoutParams );
     }
 
     public void setBackgroundColor(int backgroundColor) {
@@ -251,6 +275,10 @@ public class FormFieldView extends /*LinearLayout*/ FrameLayout {
             labelPanel.addView( label, 1 );
             valueLabel = label;
         }
+    }
+
+    public ViewGroup getLabelPanel() {
+        return labelPanel;
     }
 
     public void setFieldGroup(List<FormFieldView> fieldGroup) {

@@ -45,4 +45,8 @@ public class FormViewController extends ViewController {
     public void setForm(FormView form) {
         this.form = form;
     }
+
+    public void setBackgroundColor(int color) {
+        this.form.setBackgroundColor( color );
+    }
 }

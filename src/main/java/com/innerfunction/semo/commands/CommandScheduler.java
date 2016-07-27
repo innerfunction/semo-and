@@ -319,7 +319,7 @@ public class CommandScheduler implements Service {
                                                 execQueue.clear();
                                             }
                                         }
-                                        Log.d( Tag, String.format("Appending %@ %@", command.name, command.args ) );
+                                        Log.d( Tag, String.format("Appending %s %s", command.name, command.args ) );
                                         Map<String, Object> values = new HashMap<>();
                                         values.put("batch", batch );
                                         values.put("command", command.name );

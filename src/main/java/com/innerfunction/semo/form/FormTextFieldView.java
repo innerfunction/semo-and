@@ -19,6 +19,7 @@ import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -44,6 +45,7 @@ public class FormTextFieldView extends FormFieldView {
     private EditText input;
     private String valueLabel;
     private LinearLayout inputLayout;
+    private int defaultTitleAlignment = -1;
 
     public FormTextFieldView(Context context) {
         super( context );
@@ -61,6 +63,11 @@ public class FormTextFieldView extends FormFieldView {
         input.setSingleLine();
         input.setInputType( InputType.TYPE_CLASS_TEXT );
         setInput( input );
+
+        // Ensure value label is visible.
+        getValueLabel().setVisibility( VISIBLE );
+
+        setValue( null );
     }
 
     public EditText getInput() {
@@ -132,6 +139,11 @@ public class FormTextFieldView extends FormFieldView {
 
     @Override
     public void setValue(Object value) {
+        final TextView titleLabel = getTitleLabel();
+        // Record the title label's default text alignement if not already recorded.
+        if( defaultTitleAlignment < 0 ) {
+            defaultTitleAlignment = titleLabel.getGravity();
+        }
         String strValue = "";
         if( value instanceof String ) {
             strValue = (String)value;
@@ -147,7 +159,33 @@ public class FormTextFieldView extends FormFieldView {
             }
             strValue = sb.toString();
         }
+        strValue = strValue.trim();
         setValueLabel( strValue );
+        // Set title size and alignment according to whether there is a value or not.
+        ViewGroup.LayoutParams layoutParams = titleLabel.getLayoutParams();
+        final boolean hasValue = strValue.length() > 0;
+        if( hasValue ) {
+            titleLabel.setGravity( defaultTitleAlignment );
+            // Adjust width if value label needs space to display fully.
+            int totalWidth = getLabelPanel().getMeasuredWidth();
+            titleLabel.measure( 0, 0 );
+            int titleWidth = titleLabel.getMeasuredWidth();
+            TextView valueLabel = getValueLabel();
+            valueLabel.measure( 0, 0 );
+            int valueWidth = valueLabel.getMeasuredWidth();
+            int overflow = totalWidth - titleWidth - valueWidth;
+            if( overflow < 0 ) {
+                layoutParams.width = totalWidth - overflow;
+            }
+            else {
+                layoutParams.width = LayoutParams.WRAP_CONTENT;
+            }
+        }
+        else {
+            titleLabel.setGravity( Gravity.CENTER );
+            layoutParams.width = LayoutParams.MATCH_PARENT;
+        }
+        titleLabel.setLayoutParams( layoutParams );
         validate();
     }
 
