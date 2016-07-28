@@ -240,7 +240,9 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
 
         // Build the form.
         FormViewController formView = buildObject( configuration, container, params, identifier );
-        formView.setBehaviour( viewBehaviour );
+        if( viewBehaviour != null ) {
+            formView.setBehaviour( viewBehaviour );
+        }
 
         // Additional form configuration.
         FormView form = formView.getForm();

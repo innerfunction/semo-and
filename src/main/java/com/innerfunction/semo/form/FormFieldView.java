@@ -55,9 +55,9 @@ public class FormFieldView extends FrameLayout {
     /** The field display height. */
     private int height = DefaultHeight;
     /** The field's background colour. */
-    private int backgroundColor = Color.WHITE;
+    private int backgroundColor = Color.TRANSPARENT;
     /** The field's background colour when selected. */
-    private int focusedBackgroundColor = Color.LTGRAY;
+    private int focusedBackgroundColor = Color.TRANSPARENT;
     /** The field's background image. */
     private Drawable backgroundImage;
     /** The field's background image when selected. */
@@ -174,8 +174,18 @@ public class FormFieldView extends FrameLayout {
     }
 
     public void setSelectedStatus(boolean selected) {
-        setBackgroundColor( selected ? focusedBackgroundColor : backgroundColor );
-        // TODO: Background image.
+        if( selected ) {
+            if( focusedBackgroundColor != backgroundColor ) {
+                super.setBackgroundColor( focusedBackgroundColor );
+            }
+            if( focusedBackgroundImage != null ) {
+                super.setBackground( focusedBackgroundImage );
+            }
+        }
+        else {
+            super.setBackgroundColor( backgroundColor );
+            super.setBackground( backgroundImage );
+        }
     }
 
     public void showDisclosureIndicator() {

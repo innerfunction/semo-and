@@ -185,6 +185,13 @@ public class FormView extends ScrollView {
         }
     }
 
+    /** Refresh the form's visual status. */
+    public void refresh() {
+        for( int i = 0; i < fields.size(); i++ ) {
+            FormFieldView field = fields.get( i );
+            field.setSelectedStatus( i == focusedFieldIdx );
+        }
+    }
     /**
      * Validate all field values.
      * If any field is invalid then moves field focus to the first invalid field, and then returns false.

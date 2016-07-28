@@ -38,6 +38,11 @@ public class FormViewController extends ViewController {
         return form;
     }
 
+    @Override
+    public void onResume() {
+        form.refresh();
+    }
+
     public FormView getForm() {
         return form;
     }
