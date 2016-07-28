@@ -111,7 +111,7 @@ public class FormTextFieldView extends FormFieldView {
     }
 
     public void setIsPassword(boolean isPassword) {
-        this.isPassword = isPassword;
+        this.isPassword = false;//isPassword;
         if( isPassword ) {
             input.setTransformationMethod( PasswordTransformationMethod.getInstance() );
         }
@@ -140,7 +140,7 @@ public class FormTextFieldView extends FormFieldView {
     @Override
     public void setValue(Object value) {
         final TextView titleLabel = getTitleLabel();
-        // Record the title label's default text alignement if not already recorded.
+        // Record the title label's default text alignment if not already recorded.
         if( defaultTitleAlignment < 0 ) {
             defaultTitleAlignment = titleLabel.getGravity();
         }

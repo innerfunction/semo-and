@@ -78,7 +78,7 @@ public class FormFieldView extends FrameLayout {
     /** The right side panel of the field layout. */
     private FrameLayout accessoryPanel;
     /** The panel containing the field labels. */
-    private ViewGroup labelPanel;
+    protected ViewGroup labelPanel;
 
     public FormFieldView(Context context) {
         super( context );
@@ -117,6 +117,7 @@ public class FormFieldView extends FrameLayout {
         relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
         relParams.setMargins( 20, 0, 20, 20 );
         titleLabel.setLayoutParams( relParams );
+        titleLabel.setGravity( Gravity.CENTER_VERTICAL );
         titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         titleLabel.setSingleLine( true );
         labelPanel.addView( titleLabel );
@@ -126,7 +127,7 @@ public class FormFieldView extends FrameLayout {
         relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
         relParams.setMargins( 20, 0, 20, 20 );
         valueLabel.setLayoutParams( relParams );
-        valueLabel.setGravity( Gravity.END );
+        valueLabel.setGravity( Gravity.END | Gravity.CENTER_VERTICAL );
         valueLabel.setEllipsize( TextUtils.TruncateAt.END );
         valueLabel.setSingleLine( true );
         labelPanel.addView( valueLabel );
@@ -220,6 +221,10 @@ public class FormFieldView extends FrameLayout {
 
     public void setIsInput(boolean isInput) {
         this.isInput = isInput;
+    }
+
+    public boolean getIsInput() {
+        return isInput;
     }
 
     public void setIsSelectable(boolean isSelectable) {

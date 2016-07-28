@@ -237,6 +237,7 @@ public class FormView extends ScrollView {
                         .error( new Q.Promise.ErrorCallback() {
                             public void error(Exception e) {
                                 delegate.onSubmitRequestException( FormView.this, e );
+                                showSubmittingAppearance( false );
                             }
                         });
                 }
@@ -262,11 +263,16 @@ public class FormView extends ScrollView {
     /**
      * Update the form's visible state to show that it is submitting.
      */
-    public void showSubmittingAppearance(boolean submitting) {
-        if( loadingIndicator != null ) {
-            loadingIndicator.showFormLoading( submitting );
-        }
-        this.isEnabled = !submitting;
+    public void showSubmittingAppearance(final boolean submitting) {
+        post( new Runnable() {
+            @Override
+            public void run() {
+                if( loadingIndicator != null ) {
+                    loadingIndicator.showFormLoading( submitting );
+                }
+                FormView.this.isEnabled = !submitting;
+            }
+        });
     }
 
     /** Test if a form submit response is an error response. */
@@ -370,7 +376,17 @@ public class FormView extends ScrollView {
     }
 
     public Map<String,Object> getInputValues() {
-        return inputValues;
+        Map<String, Object> values = new HashMap<>();
+        for( FormFieldView field : fields ) {
+            if( field.getIsInput() ) {
+                String name = field.getName();
+                Object value = field.getValue();
+                if( name != null && value != null ) {
+                    values.put( name, value );
+                }
+            }
+        }
+        return values;
     }
 
     public void setIsEnabled(boolean isEnabled) {

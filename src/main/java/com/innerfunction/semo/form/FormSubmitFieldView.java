@@ -14,7 +14,7 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 /**
@@ -29,9 +29,7 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
         setIsSelectable( true );
         this.loadingIndicator = new ProgressBar( context, null, android.R.style.Widget_ProgressBar_Small );
         loadingIndicator.setIndeterminate( true );
-        loadingIndicator.setVisibility( INVISIBLE );
-        loadingIndicator.setLayoutParams( new LinearLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
-        addView( loadingIndicator );
+        loadingIndicator.setLayoutParams( new FrameLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
     }
 
     @Override
@@ -41,7 +39,11 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
 
     @Override
     public void showFormLoading(boolean loading) {
-        getTitleLabel().setVisibility( loading ? INVISIBLE : VISIBLE );
-        loadingIndicator.setVisibility( loading ? VISIBLE : INVISIBLE );
+        if( loading ) {
+            setMainView( loadingIndicator );
+        }
+        else {
+            setMainView( labelPanel );
+        }
     }
 }

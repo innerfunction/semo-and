@@ -1,5 +1,6 @@
 package com.innerfunction.semo.content;
 
+import com.innerfunction.pttn.Message;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.pttn.app.ViewControllerBehaviour;
@@ -27,5 +28,10 @@ public class WPContentLoginBehaviour implements ViewControllerBehaviour {
         if( contentContainer.getAuthManager().isLoggedIn() ) {
             AppContainer.getAppContainer().postMessage( loginAction, view );
         }
+    }
+
+    @Override
+    public boolean receiveMessage(Message message, Object sender) {
+        return false;
     }
 }

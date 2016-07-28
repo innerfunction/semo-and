@@ -45,7 +45,7 @@ public class CommandScheduler implements Service {
      * A queue used to run commands.
      * All commands are run sequentially on the same background thread.
      */
-    static final RunQueue ExecRunQueue = new RunQueue();
+    static final RunQueue ExecRunQueue = new RunQueue( Tag );
 
     /** Empty command list, used to indicate that a command has no follow on commands. */
     public static final List<CommandItem> NoFollowOns = Collections.emptyList();
