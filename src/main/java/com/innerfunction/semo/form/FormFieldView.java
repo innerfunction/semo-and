@@ -18,7 +18,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +29,7 @@ import android.widget.TextView;
 
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.semo.R;
+import com.innerfunction.util.Display;
 
 import java.util.List;
 
@@ -84,7 +84,8 @@ public class FormFieldView extends FrameLayout {
         super( context );
 
         LayoutParams layoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
-        layoutParams.setMargins( 20, 20, 20, 20 );
+        int margins = Display.dpToPx( 20 );
+        layoutParams.setMargins( margins, margins, margins, margins );
         setLayoutParams( layoutParams );
 
         LayoutInflater inflater = LayoutInflater.from( context );
@@ -108,20 +109,22 @@ public class FormFieldView extends FrameLayout {
 
     protected ViewGroup makeLabelPanel(Context context) {
         RelativeLayout labelPanel = new RelativeLayout( context );
-        labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
+        labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT ) );
         labelPanel.setBackgroundColor( Color.TRANSPARENT );
 
         this.titleLabel = new TextView( context );
-        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
+        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
+        relParams.setMargins( 20, 0, 20, 20 );
         titleLabel.setLayoutParams( relParams );
         titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         titleLabel.setSingleLine( true );
         labelPanel.addView( titleLabel );
 
         this.valueLabel = new TextView( context );
-        relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
+        relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
+        relParams.setMargins( 20, 0, 20, 20 );
         valueLabel.setLayoutParams( relParams );
         valueLabel.setGravity( Gravity.END );
         valueLabel.setEllipsize( TextUtils.TruncateAt.END );
@@ -143,6 +146,12 @@ public class FormFieldView extends FrameLayout {
         if( view != null ) {
             accessoryPanel.addView( view );
         }
+    }
+
+    protected void hideAccessoryView() {
+        ViewGroup.LayoutParams layoutParams = mainPanel.getLayoutParams();
+        layoutParams.width = LayoutParams.MATCH_PARENT;
+        mainPanel.setLayoutParams( layoutParams );
     }
 
     public boolean takeFieldFocus() {
@@ -183,6 +192,8 @@ public class FormFieldView extends FrameLayout {
         imageView.setScaleType( ImageView.ScaleType.CENTER_CROP );
         imageView.setImageDrawable( image );
         // Set the image size
+        width = Display.dpToPx( width );
+        height = Display.dpToPx( height );
         imageView.setLayoutParams( new LayoutParams( width, height ) );
         setAccessoryView( imageView );
     }
@@ -228,9 +239,7 @@ public class FormFieldView extends FrameLayout {
     public void setHeight(int height) {
         this.height = height;
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
-        float layoutHeight = height * dm.density * 1.0f;
-        layoutParams.height = (int)layoutHeight;
+        layoutParams.height = Display.dpToPx( height );
         setLayoutParams( layoutParams );
     }
 

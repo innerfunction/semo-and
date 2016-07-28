@@ -14,9 +14,7 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.view.Gravity;
 import android.widget.ImageView;
 
 /**
@@ -25,26 +23,21 @@ import android.widget.ImageView;
 public class FormImageFieldView extends FormFieldView {
 
     private ImageView imageView;
-    private Drawable image;
 
     public FormImageFieldView(Context context) {
         super( context );
         this.imageView = new ImageView( context );
+        imageView.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT ) );
         imageView.setScaleType( ImageView.ScaleType.CENTER_INSIDE );
-        imageView.setBackgroundColor( Color.TRANSPARENT );
-        // setGravity( Gravity.CENTER );
         setMainView( imageView );
+        hideAccessoryView();
     }
 
     public void setImage(Drawable image) {
         imageView.setImageDrawable( image );
-        this.image = image;
-        int height = image.getIntrinsicHeight();
-        setHeight( height );
-        imageView.setLayoutParams( new LayoutParams( height, height ) );
     }
 
     public Drawable getImage() {
-        return image;
+        return imageView.getDrawable();
     }
 }

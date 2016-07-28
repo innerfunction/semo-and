@@ -31,10 +31,8 @@
     <FrameLayout
         android:id="@+id/accessory_panel"
         android:layout_alignParentRight="true"
-        android:layout_width="10dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:minHeight="10dp"
-        android:minWidth="10dp"/>
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"/>
 
 </RelativeLayout>
