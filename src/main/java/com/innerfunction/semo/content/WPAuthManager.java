@@ -44,25 +44,25 @@ public class WPAuthManager implements AuthenticationDelegate {
     static final String Tag = WPAuthManager.class.getSimpleName();
 
     private WPContentContainer container;
-    private String wpRealm;
-    private String feedURL;
     private List<String> profileFieldNames;
     private UserDefaults userDefaults;
 
     public WPAuthManager(WPContentContainer container) {
         this.container = container;
-        this.wpRealm = container.getWpRealm();
-        this.feedURL = container.getFeedURL();
-        this.profileFieldNames = Arrays.asList("ID", "first_name", "last_name", "user_email");
+        this.profileFieldNames = Arrays.asList( "ID", "first_name", "last_name", "user_email" );
         this.userDefaults = AppContainer.getAppContainer().getUserDefaults();
     }
 
+    private String getFeedURL() {
+        return container.getFeedURL();
+    }
+
     public String getLoginURL() {
-        return Paths.join(feedURL, "account/login");
+        return Paths.join( getFeedURL(), "account/login");
     }
 
     public String getRegistrationURL() {
-        return Paths.join(feedURL, "account/create");
+        return Paths.join( getFeedURL(), "account/create");
     }
 
     public String getCreateAccountURL() {
@@ -70,7 +70,7 @@ public class WPAuthManager implements AuthenticationDelegate {
     }
 
     public String getProfileURL() {
-        return Paths.join(feedURL, "account/profile");
+        return Paths.join( getFeedURL(), "account/profile");
     }
 
     public void setProfileFieldNames(List<String> names) {
@@ -78,11 +78,11 @@ public class WPAuthManager implements AuthenticationDelegate {
     }
 
     public String getWPRealmKey(String key) {
-        return String.format("%s/%s", wpRealm, key);
+        return String.format("%s/%s", container.getWpRealm(), key);
     }
 
     public boolean isLoggedIn() {
-        return userDefaults.getBoolean(getWPRealmKey("logged-in"));
+        return userDefaults.getBoolean( getWPRealmKey("logged-in") );
     }
 
     public void storeUserCredentials(Map<String, Object> values) {
@@ -104,52 +104,52 @@ public class WPAuthManager implements AuthenticationDelegate {
         // Store standard profile values.
         Map<String, Object> profileValues = new HashMap<>();
         for( String key : profileFieldNames ) {
-            Object value = KeyPath.getValueAsString(key, values);
-            String profileKey = getWPRealmKey(key);
+            Object value = KeyPath.getValueAsString( key, values );
+            String profileKey = getWPRealmKey( key );
             if( value != null ) {
-                profileValues.put(profileKey, value);
+                profileValues.put( profileKey, value);
             }
             else {
-                profileValues.put(profileKey, Null.Placeholder);
+                profileValues.put( profileKey, Null.Placeholder);
             }
         }
         // Search for and store any meta data values.
         List<String> metaKeys = new ArrayList<>();
         for( String key : values.keySet() ) {
             if( key.startsWith("meta_") ) {
-                Object value = values.get(key);
-                String profileKey = getWPRealmKey(key);
-                profileValues.put(profileKey, value);
-                metaKeys.add(key);
+                Object value = values.get( key );
+                String profileKey = getWPRealmKey( key );
+                profileValues.put( profileKey, value );
+                metaKeys.add( key );
             }
         }
         // Store list of meta-data keys.
         String metaDataKeys = TextUtils.join(",", metaKeys);
         String profileKey = getWPRealmKey("metaDataKeys");
         // Store values.
-        userDefaults.set(profileValues);
+        userDefaults.set( profileValues );
     }
 
     public Map<String, Object> getUserProfile() {
         Map<String, Object> values = new HashMap();
         String profileKey = getWPRealmKey("user_login");
-        values.put("user_login", userDefaults.getString(profileKey));
+        values.put("user_login", userDefaults.getString( profileKey ) );
         // Read standard profile fields.
         for( String name : profileFieldNames ) {
-            profileKey = getWPRealmKey(name);
-            Object value = userDefaults.get(profileKey);
+            profileKey = getWPRealmKey( name );
+            Object value = userDefaults.get( profileKey );
             if( value != null ) {
-                values.put(name, value);
+                values.put( name, value );
             }
         }
         // Read profile meta-data.
         profileKey = getWPRealmKey("metaDataKeys");
         String[] metaDataKeys = TextUtils.split( userDefaults.getString(profileKey), ",");
         for( String metaDataKey : metaDataKeys ) {
-            profileKey = getWPRealmKey(metaDataKey);
-            Object value = userDefaults.get(profileKey);
+            profileKey = getWPRealmKey( metaDataKey );
+            Object value = userDefaults.get( profileKey );
             if( value != null ) {
-                values.put(metaDataKey, value);
+                values.put( metaDataKey, value );
             }
         }
         // Return result.
@@ -157,16 +157,16 @@ public class WPAuthManager implements AuthenticationDelegate {
     }
 
     public String getUsername() {
-        return userDefaults.getString(getWPRealmKey("user_login"));
+        return userDefaults.getString( getWPRealmKey("user_login") );
     }
 
     public void logout() {
-        userDefaults.set(getWPRealmKey("logged-in"), false);
+        userDefaults.set( getWPRealmKey("logged-in"), false );
     }
 
     public void showPasswordReminder() {
         // Fetch the password reminder URL from the server.
-        String url = Paths.join(feedURL, "account/password-reminder");
+        String url = Paths.join( getFeedURL(), "account/password-reminder");
         try {
             container.getHTTPClient().get( url )
                 .then( new Q.Promise.Callback<Response, Response>() {

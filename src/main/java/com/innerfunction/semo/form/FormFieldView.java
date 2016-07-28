@@ -84,7 +84,7 @@ public class FormFieldView extends FrameLayout {
         super( context );
 
         LayoutParams layoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
-        int margins = Display.dpToPx( 20 );
+        int margins = Display.dpToPx( 40 );
         layoutParams.setMargins( margins, margins, margins, margins );
         setLayoutParams( layoutParams );
 
