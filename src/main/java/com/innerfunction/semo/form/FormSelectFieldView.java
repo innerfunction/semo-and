@@ -170,11 +170,11 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
         };
         itemsListView.setIOCContainer( container );
         itemsListView.setContent( items );
+        itemsListView.afterIOCConfigure( configuration );
         if( selectedIndex > -1 ) {
             NSIndexPath selectedIndexPath = NSIndexPath.indexPathForRowInSection( selectedIndex, 0 );
             itemsListView.getTableView().selectRowAtIndexPath( selectedIndexPath );
         }
-        itemsListView.afterIOCConfigure( configuration );
 
         // Present the select list in a modal.
         ViewController viewController = getForm().getViewController();
