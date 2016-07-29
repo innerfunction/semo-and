@@ -30,6 +30,7 @@ public class FormViewController extends ViewController {
         super( context );
         setLayout("view_activity_layout");
         this.form = new FormView( context );
+        form.setViewController( this );
     }
 
     @Override

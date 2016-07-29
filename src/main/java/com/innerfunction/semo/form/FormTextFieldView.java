@@ -151,16 +151,9 @@ public class FormTextFieldView extends FormFieldView {
         else if( value != null ) {
             strValue = value.toString();
         }
-        super.setValue( strValue );
-        if( isPassword ) {
-            StringBuilder sb = new StringBuilder();
-            for( int i = 0; i < strValue.length(); i++ ) {
-                sb.append('\u25CF');
-            }
-            strValue = sb.toString();
-        }
         strValue = strValue.trim();
-        setValueLabel( strValue );
+        super.setValue( strValue );
+        setValueLabel( formatValue( strValue ) );
         // Set title size and alignment according to whether there is a value or not.
         ViewGroup.LayoutParams layoutParams = titleLabel.getLayoutParams();
         final boolean hasValue = strValue.length() > 0;
@@ -187,6 +180,17 @@ public class FormTextFieldView extends FormFieldView {
         }
         titleLabel.setLayoutParams( layoutParams );
         validate();
+    }
+
+    public String formatValue(String value) {
+        if( isPassword ) {
+            StringBuilder sb = new StringBuilder();
+            for( int i = 0; i < value.length(); i++ ) {
+                sb.append('\u25CF');
+            }
+            value = sb.toString();
+        }
+        return value;
     }
 
     @Override

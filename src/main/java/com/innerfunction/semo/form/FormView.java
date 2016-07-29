@@ -26,6 +26,7 @@ import android.widget.ScrollView;
 import com.innerfunction.http.Client;
 import com.innerfunction.http.Response;
 import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.q.Q;
 import com.innerfunction.util.Null;
 import com.innerfunction.util.StringTemplate;
@@ -72,6 +73,13 @@ public class FormView extends ScrollView {
 
     /** The android app context. */
     private Context androidContext;
+    /**
+     * The view controller used to display the form.
+     * Note that this has to be setup manually if the form is used outside of the
+     * FormViewController. The reference is needed so that fields such as e.g. the select field
+     * can display modal popups.
+     */
+    private ViewController viewController;
     /** The form's fields layout. */
     private LinearLayout fieldLayout;
     /** The index of the currently focused field. */
@@ -393,4 +401,11 @@ public class FormView extends ScrollView {
         this.isEnabled = isEnabled;
     }
 
+    public void setViewController(ViewController viewController) {
+        this.viewController = viewController;
+    }
+
+    public ViewController getViewController() {
+        return viewController;
+    }
 }
