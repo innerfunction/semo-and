@@ -32,7 +32,7 @@ public class MvFileCommand implements Command {
     @Override
     public Q.Promise<List<CommandScheduler.CommandItem>> execute(String name, List args) {
         if( args.size() < 2 ) {
-            Q.reject("Wrong number of arguments");
+            return Q.reject("Wrong number of arguments");
         }
         File fromFile = new File( args.get( 0 ).toString() );
         File toFile = new File( args.get( 1 ).toString() );

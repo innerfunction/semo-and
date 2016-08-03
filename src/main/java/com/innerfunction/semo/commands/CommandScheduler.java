@@ -121,7 +121,7 @@ public class CommandScheduler implements Service {
         commands = new HashMap<>();
         commands.put("rm", new RmFileCommand() );
         commands.put("mv", new MvFileCommand() );
-        commands.put("unzip", new UnzipCommand() );
+        commands.put("unzip", new UnzipCommand( androidContext ) );
     }
 
     /**
@@ -349,6 +349,7 @@ public class CommandScheduler implements Service {
 
     /** Continue queue processing after execution a command. */
     private void continueQueueProcessingAfterCommand(String rowID) {
+        db.beginTransaction();
         // Delete the command record from the queue.
         if( deleteExecutedQueueRecords ) {
             db.delete("queue", rowID );

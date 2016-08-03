@@ -41,6 +41,7 @@ import com.samskivert.mustache.MustacheException;
 
 import static com.innerfunction.util.DataLiterals.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -184,13 +185,21 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
             )),
             kv("packagedContentPath",        "$packagedContentPath"),
             kv("contentPath",                "$contentPath"),
-            kv("commandScheduler",           m( kv("*and-class", "com.innerfunction.semo.commands.CommandScheduler")))
+            kv("commandScheduler",           m(
+                kv("*and-class", "com.innerfunction.semo.commands.CommandScheduler")
+            ))
         );
         this.configTemplate = new Configuration( template, context );
 
         this.uriScheme = new WPSchemeHandler( this );
 
-        // TODO content paths
+        // Cache locations.
+        File storageDir = Files.getStorageDir( context );
+        this.stagingPath = new File( storageDir, "com.innerfunction.semo.staging").getAbsolutePath();
+        this.baseContentPath = new File( storageDir, "com.innerfunction.semo.base").getAbsolutePath();
+
+        File cacheDir = Files.getCacheDir( context );
+        this.contentPath = new File( cacheDir, "com.innerfunction.semo.content").getAbsolutePath();
 
         // Factory for producing login + account management forms.
         this.formFactory = new WPContentContainerFormFactory( this );
@@ -496,17 +505,6 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     /** Called immediately after the object is configured by calls to its properties. */
     @Override
     public void afterIOCConfigure(Configuration configuration) {
-        // Packaged content is packaged with the app executable.
-        String packagedContentPath = "";
-        /* TODO
-        Packaged content has to be read from assets. Following code taken from com.eventpac.subscriptions.SubsSchemeHandler
-            String assetName = Paths.join( subsService.getInitialContentPath(), uri.getName() );
-            if( assetManager.assetExists( assetName ) ) {
-                resource = new AnRResource.Asset( context, assetName, assetManager, uri, parent );
-
-        iOS code:
-            String packagedContentPath = [MainBundlePath stringByAppendingPathComponent:_packagedContentPath];
-         */
 
         // Setup configuration parameters.
         Map<String,Object> parameters = m(

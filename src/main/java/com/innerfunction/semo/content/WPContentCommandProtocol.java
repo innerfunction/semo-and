@@ -13,6 +13,7 @@
 // limitations under the License
 package com.innerfunction.semo.content;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -20,6 +21,7 @@ import com.innerfunction.q.Q;
 import com.innerfunction.semo.commands.Command;
 import com.innerfunction.semo.commands.CommandProtocol;
 import com.innerfunction.semo.db.DB;
+import com.innerfunction.util.Assets;
 import com.innerfunction.util.Files;
 import com.innerfunction.util.KeyPath;
 import com.innerfunction.util.Paths;
@@ -28,6 +30,8 @@ import static com.innerfunction.util.DataLiterals.*;
 import static com.innerfunction.semo.commands.CommandScheduler.CommandItem;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -65,8 +69,10 @@ public class WPContentCommandProtocol extends CommandProtocol {
     private String packagedContentPath;
     /** Path to directory hosting downloaded content. */
     private String contentPath;
+    /** Access to the app's assets files. */
+    private Assets assets;
 
-    public WPContentCommandProtocol() {
+    public WPContentCommandProtocol(Context context) {
         addCommand("refresh", new Command() {
             @Override
             public Q.Promise<List<CommandItem>> execute(String name, List args) {
@@ -91,6 +97,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
                 return WPContentCommandProtocol.this.unpack( args );
             }
         });
+        this.assets = new Assets( context );
     }
 
     public void setFeedURL(String url) {
@@ -300,27 +307,33 @@ public class WPContentCommandProtocol extends CommandProtocol {
             packagedContentPath = this.packagedContentPath;
         }
         if( packagedContentPath != null ) {
-            Date startTime = new Date();
-            File feedFile = new File( Paths.join( packagedContentPath, "feed.json") );
-            File baseContentFile = new File( Paths.join( packagedContentPath, "base-content.zip") );
-            // Read initial posts data from packaged feed file.
-            List<Map<String,Object>> feedItems = (List<Map<String,Object>>)Files.readJSON( feedFile );
-            if( feedItems != null ) {
-                // Iterate over items and update post database.
-                postDB.beginTransaction();
-                postDB.merge("posts", feedItems );
-                rebuildClosureTable( feedItems );
-                postDB.commitTransaction();
+            try {
+                Date startTime = new Date();
+                String feedFilePath = Paths.join( packagedContentPath, "feed.json" );
+                // Read initial posts data from packaged feed file.
+                InputStream feedFileStream = assets.openInputStream( feedFilePath );
+                List<Map<String, Object>> feedItems = (List<Map<String, Object>>)Files.readJSON( feedFileStream, feedFilePath );
+                if( feedItems != null ) {
+                    // Iterate over items and update post database.
+                    postDB.beginTransaction();
+                    postDB.merge( "posts", feedItems );
+                    rebuildClosureTable( feedItems );
+                    postDB.commitTransaction();
+                }
+                Date endTime = new Date();
+                Log.d( Tag, String.format( "Content unpack took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
+                // Schedule command to unzip base content if the base content zip exists.
+                String baseContentPath = Paths.join( packagedContentPath, "base-content.zip" );
+                if( assets.assetExists( baseContentPath ) ) {
+                    commands.add( new CommandItem( "unzip", "-asset", baseContentPath, contentPath ) );
+                }
+                // Schedule command to bulk download initial image content, if an image pack URL is given.
+                if( imagePackURL != null ) {
+                    commands.add( new CommandItem( "dlzip", imagePackURL, contentPath ) );
+                }
             }
-            Date endTime = new Date();
-            Log.d( Tag, String.format("Content unpack took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
-            // Schedule command to unzip base content if the base content zip exists.
-            if( baseContentFile.exists() ) {
-                commands.add( new CommandItem("unzip", baseContentFile.getAbsolutePath(), contentPath ) );
-            }
-            // Schedule command to bulk download initial image content, if an image pack URL is given.
-            if( imagePackURL != null ) {
-                commands.add( new CommandItem("dlzip", imagePackURL, contentPath ) );
+            catch(IOException e) {
+                return Q.reject( e );
             }
         }
         return Q.resolve( commands );
