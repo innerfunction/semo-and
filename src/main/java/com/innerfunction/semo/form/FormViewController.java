@@ -28,7 +28,7 @@ public class FormViewController extends ViewController {
 
     public FormViewController(Context context) {
         super( context );
-        setLayout("view_activity_layout");
+        setLayoutName("view_activity_layout");
         this.form = new FormView( context );
         form.setViewController( this );
     }
