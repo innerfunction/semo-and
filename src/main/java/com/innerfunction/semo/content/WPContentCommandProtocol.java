@@ -133,7 +133,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
             refreshInProgress = true;
 
             String refreshURL = feedURL.concat("/updates");
-            Map<String,Object> argsMap = parseArgs( args, new String[0], m( kv("refreshURL", refreshURL )));
+            Map<String,Object> argsMap = parseArgs( args, m( kv("refreshURL", refreshURL )));
             refreshURL = KeyPath.getValueAsString("refreshURL", argsMap );
             String getURL = refreshURL;
 
@@ -169,7 +169,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
         refreshInProgress = true;
 
         // Parse arguments. Allow the feed file path to be optionally specified as a command argument.
-        Map<String,Object> argsMap = parseArgs( args, new String[]{ "refreshURL", "pageFile" }, m() );
+        Map<String,Object> argsMap = parseArgs( args, null, "refreshURL", "pageFile");
         String refreshURL = KeyPath.getValueAsString("refreshURL", argsMap );
         String pageFilePath = KeyPath.getValueAsString("pageFile", argsMap );
 
@@ -294,7 +294,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
     public Q.Promise<List<CommandItem>> unpack(List args) {
         List<CommandItem> commands = new ArrayList<>();
         // Parse arguments.
-        Map<String,String> argsMap = parseArgs( args, new String[0], null );
+        Map<String,String> argsMap = parseArgs( args, null );
         String packagedContentPath = KeyPath.getValueAsString("packagedContentPath", argsMap );
         if( packagedContentPath == null ) {
             packagedContentPath = this.packagedContentPath;

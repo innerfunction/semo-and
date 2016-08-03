@@ -205,7 +205,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     /** Unpack packaged content. */
     public void unpackPackagedContent() {
-        int count = postDB.countInTable( "posts", "1=1" );
+        int count = postDB.countInTable("posts", "1=1");
         if( count == 0 ) {
             commandScheduler.appendCommand("content.unpack");
             // Note: executeQueue() isn't called here but is called by the startService() method
@@ -297,7 +297,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         postData = renderPostContent( postData );
         // Load the client template for the post type.
         String postType = (String)postData.get("type");
-        String templateName = String.format( "template-%s.html", postType );
+        String templateName = String.format("template-%s.html", postType );
         String templatePath = Paths.join( baseContentPath, templateName );
         if( !Files.fileExists( templatePath ) ) {
             templatePath = Paths.join( baseContentPath, "template-single.html");
@@ -315,7 +315,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         // Generate a content URL within the base content directory - this to ensure that references
         // to base content can be resolved as relative references.
         String separator = (baseContentPath.endsWith("/") ? "" : "/");
-        String contentURL = String.format( "file://%s%s%s-%s.html", baseContentPath, separator, postType, postID );
+        String contentURL = String.format("file://%s%s%s-%s.html", baseContentPath, separator, postType, postID );
         // Add the post content and URL to the post data.
         postData.put("content", postHTML );
         postData.put("contentURL", contentURL );
@@ -368,11 +368,9 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
                 filterParams.put( fieldName, paramValue );
             }
             // Remove any parameters not corresponding to a column on the posts table.
-            //filter.filters = [_postDB filterValues:filterParams forTable:@"posts"];
             filter.setFilters( postDB.filterColumnNamesForTable("posts", filterParams ) );
             // Apply the filter.
             postData = filter.applyTo( postDB, null );
-            //postData = [filter applyTo:_postDB withParameters:@{}];
         }
         String format = KeyPath.getValueAsString("_format", params );
         if( format == null ) {
@@ -382,7 +380,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         if( formatter != null ) {
             postData = formatter.formatData( postData );
         }
-        return postData;    }
+        return postData;
+    }
 
     /**
      * Search the post database for the specified text in the specified post types with an optional parent post.

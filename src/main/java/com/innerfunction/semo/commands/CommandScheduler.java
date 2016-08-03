@@ -355,7 +355,7 @@ public class CommandScheduler implements Service {
         }
         else {
             Map<String,Object> values = new HashMap<>();
-            values.put("id",     rowID );
+            values.put("id", rowID );
             values.put("status", "X");
             db.update("queue", values );
         }
