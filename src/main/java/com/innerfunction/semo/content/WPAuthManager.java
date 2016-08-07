@@ -126,6 +126,7 @@ public class WPAuthManager implements AuthenticationDelegate {
         // Store list of meta-data keys.
         String metaDataKeys = TextUtils.join(",", metaKeys);
         String profileKey = getWPRealmKey("metaDataKeys");
+        profileValues.put( profileKey, metaDataKeys );
         // Store values.
         userDefaults.set( profileValues );
     }

@@ -58,7 +58,7 @@ public class ContentTableViewCell extends ATableViewCell {
     public int getCellHeight() {
         TextView label = getDetailTextLabel();
         if( label != null ) {
-            //label.measure( 0, 0 );
+            label.measure( 0, 0 );
             int height = label.getLineHeight() * label.getLineCount();
             return height;
         }

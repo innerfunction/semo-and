@@ -140,7 +140,7 @@ public class ContentTableViewController extends TableViewController {
                 if( action == null && _action != null ) {
                     // If no action on cell data, but action defined on table then eval as a
                     // template on the cell data.
-                    action = StringTemplate.render( _action, rowData );
+                    action = StringTemplate.render( _action, rowData.getValues() );
                 }
                 if( action != null ) {
                     AppContainer.getAppContainer().postMessage( action, ContentTableViewController.this );

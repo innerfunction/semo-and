@@ -39,6 +39,8 @@ import com.innerfunction.util.StringTemplate;
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.MustacheException;
 
+import org.json.simple.JSONObject;
+
 import static com.innerfunction.util.DataLiterals.*;
 
 import java.io.File;
@@ -116,7 +118,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
      * Any post type not described in this property will allow any child post type.
      * Used by the getPostChildren: methods.
      */
-    private Map<String,Object> postTypeRelations;
+    private JSONObject postTypeRelations;
 
     public WPContentContainer(Context context) {
         super( context, StandardURIHandler.getInstance( context ) );
@@ -722,4 +724,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         this.searchResultLimit = limit;
     }
 
+    public void setPostTypeRelations(JSONObject relations) {
+        this.postTypeRelations = relations;
+    }
 }

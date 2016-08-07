@@ -1,9 +1,10 @@
-package com.innerfunction.semo.content;
+package com.innerfunction.semo.content.ui;
 
 import com.innerfunction.pttn.Message;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.pttn.app.ViewControllerBehaviour;
+import com.innerfunction.semo.content.WPContentContainer;
 
 /**
  * A view behaviour which checks whether a user is currently logged into the app.
@@ -17,9 +18,19 @@ public class WPContentLoginBehaviour implements ViewControllerBehaviour {
     private WPContentContainer contentContainer;
     private String loginAction;
 
+    public WPContentLoginBehaviour() {}
+
     public WPContentLoginBehaviour(WPContentContainer container, String loginAction) {
         this.contentContainer = container;
         this.loginAction = loginAction;
+    }
+
+    public void setContainer(WPContentContainer container) {
+        this.contentContainer = container;
+    }
+
+    public void setLoginAction(String action) {
+        this.loginAction = action;
     }
 
     @Override
