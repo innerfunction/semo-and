@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 /**
  * A SQL database wrapper.
@@ -67,6 +68,8 @@ public class DB implements Service, IOCContextAware {
     private boolean resetDatabase;
     /** Database table schemas + initial data. */
     private Map<String,Table> tables;
+
+    private Semaphore writeLock = new Semaphore( 1 );
 
     public DB() {
         this.name = "semo";
@@ -118,12 +121,8 @@ public class DB implements Service, IOCContextAware {
 
     public void setTables(Map<String,Table> tables) {
         this.tables = tables;
-        // NOTE following contains a small bit of a hack - because the table configuration
-        // doesn't explicitly contain the table name (e.g. see table scheme defined in
-        // WPContentContainer), it needs to be set here before processing the table data.
         for( String name : tables.keySet() ) {
             Table table = tables.get( name );
-            table.name = name;
             Map<String, String> columnTags = new HashMap<>();
             Set<String> columnNames = new HashSet<>();
             for( Column column : table.columns ) {
@@ -142,12 +141,18 @@ public class DB implements Service, IOCContextAware {
     }
 
     /**
-     * Begin a DB transaction.
+     * Open a writeable database connection and begin a transaction.
      */
     public boolean beginTransaction() {
-        SQLiteDatabase db = helper.getWritableDatabase();
-        db.beginTransaction();
-        return true;
+        try {
+            writeLock.acquire();
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.beginTransaction();
+            return true;
+        }
+        catch(InterruptedException e) {
+            return false;
+        }
     }
 
     /**
@@ -164,12 +169,8 @@ public class DB implements Service, IOCContextAware {
             Log.e( Tag, "Committing transaction", e );
         }
         finally {
-            try {
-                db.endTransaction();
-            }
-            finally {
-                db.close();
-            }
+            db.endTransaction();
+            writeLock.release();
         }
         return ok;
     }
@@ -179,12 +180,8 @@ public class DB implements Service, IOCContextAware {
      */
     public boolean rollbackTransaction() {
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            db.endTransaction();
-        }
-        finally {
-            db.close();
-        }
+        db.endTransaction();
+        writeLock.release();
         return true;
     }
 
@@ -308,10 +305,23 @@ public class DB implements Service, IOCContextAware {
      * @return true if the statement executed successfully.
      */
     public boolean performUpdate(String sql, String... args) {
+        boolean ok;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ok = performUpdate( db, sql, args );
+        return ok;
+    }
+
+    /**
+     * Perform an update in the DB.
+     * @param db    A writeable database connection.
+     * @param sql   The SQL to execute.
+     * @param args  Arguments to the SQL.
+     * @return true if the statement executed successfully.
+     */
+    public boolean performUpdate(SQLiteDatabase db, String sql, String... args) {
         args = replaceNullParameterValue( args );
         boolean ok = true;
         SQLiteStatement statement = null;
-        SQLiteDatabase db = helper.getWritableDatabase();
         try {
             statement = db.compileStatement( sql );
             statement.bindAllArgsAsStrings( args );
@@ -322,13 +332,8 @@ public class DB implements Service, IOCContextAware {
             ok = false;
         }
         finally {
-            try {
-                if( statement != null ) {
-                    statement.close();
-                }
-            }
-            finally {
-                db.close();
+            if( statement != null ) {
+                statement.close();
             }
         }
         return ok;
@@ -390,16 +395,11 @@ public class DB implements Service, IOCContextAware {
     public boolean insert(String table, List<Map<String,Object>> valuesList) {
         boolean result = true;
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            // TODO willChangeValueForKey:table
-            for( Map<String, Object> values : valuesList ) {
-                result &= insert( db, table, values );
-            }
-            // TODO didChangeValueForKey:table
+        // TODO willChangeValueForKey:table
+        for( Map<String, Object> values : valuesList ) {
+            result &= insert( db, table, values );
         }
-        finally {
-            db.close();
-        }
+        // TODO didChangeValueForKey:table
         return result;
     }
 
@@ -413,18 +413,13 @@ public class DB implements Service, IOCContextAware {
     public boolean insert(String table, Map<String,Object> values) {
         boolean result;
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            // TODO willChangeValueForKey:table
-            result = insert( db, table, values );
-            // TODO didChangeValueForKey:table
-        }
-        finally {
-            db.close();
-        }
+        // TODO willChangeValueForKey:table
+        result = insert( db, table, values );
+        // TODO didChangeValueForKey:table
         return result;
     }
 
-    protected boolean insert(SQLiteDatabase db, String table, Map<String,Object> values) {
+    public boolean insert(SQLiteDatabase db, String table, Map<String,Object> values) {
         boolean result = true;
         ContentValues cvalues = toContentValues( table, values );
         if( cvalues.size() > 0 ) {
@@ -450,20 +445,15 @@ public class DB implements Service, IOCContextAware {
     public boolean update(String table, Map<String,Object> values) {
         boolean result;
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            // TODO willChangeValueForKey:table
-            result = update( db, table, values );
-            if( result ) {
-                // TODO didChangeValueForKey:table
-            }
-            else {
-                String idColumn = getColumnForTag( table, "id" );
-                String id = values.get( idColumn ).toString();
-                Log.w( Tag, String.format( "Updated failed: %s %s", table, id ) );
-            }
+        // TODO willChangeValueForKey:table
+        result = update( db, table, values );
+        if( result ) {
+            // TODO didChangeValueForKey:table
         }
-        finally {
-            db.close();
+        else {
+            String idColumn = getColumnForTag( table, "id" );
+            String id = values.get( idColumn ).toString();
+            Log.w( Tag, String.format( "Updated failed: %s %s", table, id ) );
         }
         return result;
     }
@@ -499,25 +489,29 @@ public class DB implements Service, IOCContextAware {
     public boolean upsert(String table, Map<String,Object> values) {
         boolean result;
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            // TODO willChangeValueForKey:table
-            result = upsert( db, table, values );
-            if( result ) {
-                // TODO didChangeValueForKey:table
-            }
-            else {
-                String idColumn = getColumnForTag( table, "id" );
-                String id = values.get( idColumn ).toString();
-                Log.w( Tag, String.format( "Updated failed: %s %s", table, id ) );
-            }
+        // TODO willChangeValueForKey:table
+        result = upsert( db, table, values );
+        if( result ) {
+            // TODO didChangeValueForKey:table
         }
-        finally {
-            db.close();
+        else {
+            String idColumn = getColumnForTag( table, "id" );
+            String id = values.get( idColumn ).toString();
+            Log.w( Tag, String.format( "Updated failed: %s %s", table, id ) );
         }
         return result;
     }
 
-    private boolean upsert(SQLiteDatabase db, String table, Map<String,Object> values) {
+    /**
+     * Update or insert an object in the database.
+     * Notifies any observers of the 'db' model.
+     * @param db        A writeable database connection.
+     * @param table     The table used to store the object data.
+     * @param values    The values to update the object with. Each item in the map should correspond to a
+     *                  column in the table. A value must be supplied for the ID column.
+     * @return true if all values were inserted.
+     */
+    public boolean upsert(SQLiteDatabase db, String table, Map<String,Object> values) {
         boolean update = false;
         String idColumn = getColumnForTag( table, "id" );
         if( idColumn != null ) {
@@ -529,7 +523,7 @@ public class DB implements Service, IOCContextAware {
                 update = (count == 1);
             }
         }
-        if (update) {
+        if( update ) {
             return update( db, table, idColumn, values );
         }
         else {
@@ -549,38 +543,48 @@ public class DB implements Service, IOCContextAware {
      * @return true if all values were merged successfully into the db.
      */
     public boolean merge(String table, List<Map<String,Object>> valuesList) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        return merge( db, table, valuesList );
+    }
+
+    /**
+     * Merge a list of values into the database.
+     * Notifies any observers of the 'db' model.
+     * @param db            A writeable database connection.
+     * @param table         The name of the table to merge values into.
+     * @param valuesList    A list of items to merge into the table data. Each item in the list should
+     *                      contain a value for the ID column, and all other values should correspond to
+     *                      columns in the table. If a row already exists in the table with the same ID
+     *                      as an item, then the row is updated with that item's values. Otherwise, a new
+     *                      row is inserted with the item's values.
+     * @return true if all values were merged successfully into the db.
+     */
+    public boolean merge(SQLiteDatabase db, String table, List<Map<String,Object>> valuesList) {
         boolean result = true;
         String idColumn = getColumnForTag( table, "id" );
         if( idColumn != null ) {
-            SQLiteDatabase db = helper.getWritableDatabase();
-            try {
-                // TODO willChangeValueForKey:table
-                int i = 0;
-                for( Map<String, Object> values : valuesList ) {
-                    String id = values.get( idColumn ).toString();
-                    Map<String, Object> record = read( db, table, idColumn, id );
-                    if( record != null ) {
-                        record.putAll( values );
-                        result &= update( db, table, idColumn, record );
-                    }
-                    else {
-                        result &= insert( db, table, values );
-                    }
-                    i++;
-                    Log.i( Tag, String.format( "Merged %d records...", i ) );
+            // TODO willChangeValueForKey:table
+            int i = 0;
+            for( Map<String, Object> values : valuesList ) {
+                String id = values.get( idColumn ).toString();
+                Map<String, Object> record = read( db, table, idColumn, id );
+                if( record != null ) {
+                    record.putAll( values );
+                    result &= update( db, table, idColumn, record );
                 }
-                // TODO didChangeValueForKey:table
+                else {
+                    result &= insert( db, table, values );
+                }
+                i++;
+                Log.i( Tag, String.format( "Merged %d records...", i ) );
             }
-            finally {
-                db.close();
-            }
+            // TODO didChangeValueForKey:table
         }
         else {
             Log.w( Tag, String.format("No ID column found for table %s", table ));
         }
         return result;
     }
-
 
     /**
      * Delete objects from the database.
@@ -608,20 +612,15 @@ public class DB implements Service, IOCContextAware {
         boolean ok = false;
         if( ids.length > 0 ) {
             SQLiteDatabase db = helper.getWritableDatabase();
-            try {
-                // TODO willChangeValueForKey:table
-                StringBuilder placeholders = new StringBuilder( "?" );
-                for( int i = 1; i < ids.length; i++ ) {
-                    placeholders.append( ",?" );
-                }
-                String where = String.format( "%s IN (%s)", idColumn, placeholders );
-                int count = db.delete( table, where, ids );
-                ok = (count == ids.length);
-                // TODO didChangeValueForKey:table
+            // TODO willChangeValueForKey:table
+            StringBuilder placeholders = new StringBuilder( "?" );
+            for( int i = 1; i < ids.length; i++ ) {
+                placeholders.append( ",?" );
             }
-            finally {
-                db.close();
-            }
+            String where = String.format( "%s IN (%s)", idColumn, placeholders );
+            int count = db.delete( table, where, ids );
+            ok = (count == ids.length);
+            // TODO didChangeValueForKey:table
         }
         return ok;
     }
@@ -630,13 +629,12 @@ public class DB implements Service, IOCContextAware {
         int result;
         args = replaceNullParameterValue( args );
         SQLiteDatabase db = helper.getWritableDatabase();
-        try {
-            result = db.delete( table, where, args );
-        }
-        finally {
-            db.close();
-        }
+        result = deleteWhere( db, table, where, args );
         return result;
+    }
+
+    public int deleteWhere(SQLiteDatabase db, String table, String where, String... args) {
+        return db.delete( table, where, args );
     }
 
     /**
@@ -669,9 +667,13 @@ public class DB implements Service, IOCContextAware {
 
     /** Create and return a new instance of this database connection. */
     public DB newInstance() {
+        // TODO Review this; idea is that there should only be one connection per db.
+        /*
         DB db = new DB( this );
         db.startService();
         return db;
+        */
+        return this;
     }
 
     // Service interface
@@ -686,6 +688,8 @@ public class DB implements Service, IOCContextAware {
     }
 
     @Override
-    public void stopService() {}
+    public void stopService() {
+        helper.close();
+    }
 
 }

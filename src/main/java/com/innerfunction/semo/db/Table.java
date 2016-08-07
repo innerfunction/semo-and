@@ -13,13 +13,15 @@
 // limitations under the License
 package com.innerfunction.semo.db;
 
+import com.innerfunction.pttn.IOCObjectAware;
+
 import java.util.List;
 import java.util.Map;
 
 /**
  * Attached by juliangoacher on 09/05/16.
  */
-public class Table {
+public class Table implements IOCObjectAware {
 
     protected String name;
     protected Column[] columns;
@@ -62,5 +64,15 @@ public class Table {
 
     public void setData(List<?> data) {
         this.data = data;
+    }
+
+    @Override
+    public void notifyIOCObject(Object object, String propertyName) {
+        // If table hasn't explicitly configured with a name then take its name from the
+        // property is bound to. This is to allow configurations in the following form:
+        // { "tables": { "table_name": { ...table def... } }
+        if( this.name == null ) {
+            this.name = propertyName;
+        }
     }
 }

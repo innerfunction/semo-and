@@ -14,6 +14,8 @@
 package com.innerfunction.semo.content.ui;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.text.Html;
 import android.widget.TextView;
 
@@ -56,7 +58,9 @@ public class ContentTableViewCell extends ATableViewCell {
     public int getCellHeight() {
         TextView label = getDetailTextLabel();
         if( label != null ) {
-            return label.getHeight();
+            //label.measure( 0, 0 );
+            int height = label.getLineHeight() * label.getLineCount();
+            return height;
         }
         return getTextLabel().getHeight();
     }

@@ -349,7 +349,6 @@ public class CommandScheduler implements Service {
 
     /** Continue queue processing after execution a command. */
     private void continueQueueProcessingAfterCommand(String rowID) {
-        db.beginTransaction();
         // Delete the command record from the queue.
         if( deleteExecutedQueueRecords ) {
             db.delete("queue", rowID );
@@ -360,7 +359,6 @@ public class CommandScheduler implements Service {
             values.put("status", "X");
             db.update("queue", values );
         }
-        db.commitTransaction();
         // Continue to next queued command.
         executeNextCommand();
     }

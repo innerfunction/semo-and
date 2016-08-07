@@ -14,6 +14,7 @@
 package com.innerfunction.semo.content;
 
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
@@ -253,45 +254,49 @@ public class WPContentCommandProtocol extends CommandProtocol {
         // Iterate over items and update post database, generate commands to download base content
         // & media items.
         postDB.beginTransaction();
-        for( Map<String,Object> item : feedItems ) {
-            String type = KeyPath.getValueAsString("type", item );
-            if( BaseContentType.equals( type ) ) {
-                // Download base content update.
-                commands.add( new CommandItem("get", item.get("url"), baseContentFile, 3 ) );
-                commands.add( new CommandItem("unzip", baseContentFile, baseContentPath ) );
-                commands.add( new CommandItem("rm", baseContentFile ) );
-            }
-            else {
-                // Upadate post item in database.
-                String status = KeyPath.getValueAsString("status", item );
-                if( "trash".equals( status ) ) {
-                    // Item is deleted.
-                    String postID = KeyPath.getValueAsString("id", item );
-                    postDB.performUpdate("DELETE FROM posts WHERE id=?", postID );
-                    postDB.performUpdate("DELETE FROM closures WHERE child=? OR parent=?", postID, postID );
-                    // If attachment then delete file from content path.
-                    if( "attachment".equals( type ) ) {
-                        String filename = KeyPath.getValueAsString("filename", item );
-                        String filepath = Paths.join( contentPath, filename );
-                        commands.add( new CommandItem("rm", filepath ) );
-                    }
+        try {
+            for( Map<String, Object> item : feedItems ) {
+                String type = KeyPath.getValueAsString( "type", item );
+                if( BaseContentType.equals( type ) ) {
+                    // Download base content update.
+                    commands.add( new CommandItem( "get", item.get( "url" ), baseContentFile, 3 ) );
+                    commands.add( new CommandItem( "unzip", baseContentFile, baseContentPath ) );
+                    commands.add( new CommandItem( "rm", baseContentFile ) );
                 }
                 else {
-                    postDB.upsert("posts", item );
-                    updateClosureTableForPost( item );
-                    // Download attachment updates.
-                    if( "attachment".equals( type ) ) {
-                        String filename = KeyPath.getValueAsString("filename", item );
-                        // NOTE that file is downloaded directly to the content path.
-                        String filepath = Paths.join( contentPath, filename );
-                        // Delete any previously downloaded copy of the file.
-                        commands.add( new CommandItem("rm", filepath ) );
-                        commands.add( new CommandItem("get", item.get("url"), filepath, 2 ) );
+                    // Upadate post item in database.
+                    String status = KeyPath.getValueAsString( "status", item );
+                    if( "trash".equals( status ) ) {
+                        // Item is deleted.
+                        String postID = KeyPath.getValueAsString( "id", item );
+                        postDB.performUpdate("DELETE FROM posts WHERE id=?", postID );
+                        postDB.performUpdate("DELETE FROM closures WHERE child=? OR parent=?", postID, postID );
+                        // If attachment then delete file from content path.
+                        if( "attachment".equals( type ) ) {
+                            String filename = KeyPath.getValueAsString( "filename", item );
+                            String filepath = Paths.join( contentPath, filename );
+                            commands.add( new CommandItem( "rm", filepath ) );
+                        }
+                    }
+                    else {
+                        postDB.upsert("posts", item );
+                        updateClosureTableForPost( item );
+                        // Download attachment updates.
+                        if( "attachment".equals( type ) ) {
+                            String filename = KeyPath.getValueAsString( "filename", item );
+                            // NOTE that file is downloaded directly to the content path.
+                            String filepath = Paths.join( contentPath, filename );
+                            // Delete any previously downloaded copy of the file.
+                            commands.add( new CommandItem( "rm", filepath ) );
+                            commands.add( new CommandItem( "get", item.get( "url" ), filepath, 2 ) );
+                        }
                     }
                 }
             }
         }
-        postDB.commitTransaction();
+        finally {
+            postDB.commitTransaction();
+        }
         // Tidy up.
         commands.add( new CommandItem("rm", feedFile.getAbsolutePath() ) );
         refreshInProgress = false;
@@ -306,7 +311,9 @@ public class WPContentCommandProtocol extends CommandProtocol {
         if( packagedContentPath == null ) {
             packagedContentPath = this.packagedContentPath;
         }
-        if( packagedContentPath != null ) {
+        // TODO Re-enable this once problems with db are debugged.
+        boolean RUN_THIS_CODE = false;
+        if( RUN_THIS_CODE && packagedContentPath != null ) {
             try {
                 Date startTime = new Date();
                 String feedFilePath = Paths.join( packagedContentPath, "feed.json" );
@@ -316,9 +323,15 @@ public class WPContentCommandProtocol extends CommandProtocol {
                 if( feedItems != null ) {
                     // Iterate over items and update post database.
                     postDB.beginTransaction();
-                    postDB.merge( "posts", feedItems );
-                    rebuildClosureTable( feedItems );
-                    postDB.commitTransaction();
+                    try {
+                        postDB.merge("posts", feedItems );
+                        rebuildClosureTable( feedItems );
+                        postDB.commitTransaction();
+                    }
+                    catch(Exception e) {
+                        postDB.rollbackTransaction();
+                        throw e;
+                    }
                 }
                 Date endTime = new Date();
                 Log.d( Tag, String.format( "Content unpack took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
@@ -371,7 +384,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
             kv("depth", 0 )
         ));
 
-/*  NOTE This moved to the updateClosureTableForPost function beause otherwise duplicate
+/*  NOTE This moved to the updateClosureTableForPost function because otherwise duplicate
     closure entries are created; this presumably happens because when this function is
     called from the rebuildClosureTable() function, the necessary child post entries are
     eventually added (i.e. re-added) later in the loop.
@@ -396,7 +409,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
     }
 
     private void rebuildClosureTable(List<Map<String,Object>> posts) {
-        postDB.delete("closures","1 = 1");
+        postDB.deleteWhere("closures", "1 = 1");
         for( Map<String,Object> post : posts ) {
             insertClosureEntriesForPost( post );
         }

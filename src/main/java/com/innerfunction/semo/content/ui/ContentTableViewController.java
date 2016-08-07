@@ -37,8 +37,8 @@ public class ContentTableViewController extends TableViewController {
 
     private DataFormatter dataFormatter;
     private Drawable rowImage;
-    private Number rowImageHeight;
-    private int rowImageWidth;
+    private Number rowImageHeight = 50;
+    private int rowImageWidth = 50;
     private String action;
     private boolean showRowContent;
     private ContentTableViewCell layoutCell;
