@@ -455,7 +455,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         if( where == null ) {
             where = "1=1";
         }
-        if( parentPostID != null ) {
+        if( parentPostID != null && parentPostID.length() > 0 ) {
             // If a parent post ID is specified then add a join to, and filter on, the closures
             // table.
             tables = tables.concat(", closures");

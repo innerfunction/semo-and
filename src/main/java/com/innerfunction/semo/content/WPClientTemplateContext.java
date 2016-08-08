@@ -214,7 +214,7 @@ public class WPClientTemplateContext implements IOCContainerAware {
 
             // Cache the result before returning.
             cache.put( key, url );
-            
+
             return url;
         }
     }
