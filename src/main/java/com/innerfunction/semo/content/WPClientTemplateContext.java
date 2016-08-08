@@ -24,6 +24,7 @@ import com.innerfunction.util.Paths;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +149,13 @@ public class WPClientTemplateContext implements IOCContainerAware {
         private DB postDB;
         private String packagedContentPath;
         private String contentPath;
+        /**
+         * A cache of previously requested attachments, keyed by ID.
+         * When reading from a map, jMustache calls containsKey(..) before calling get(..)
+         * so it makes sense for get(..) to maintain a cache of attachment requests and for
+         * containsKey(..) to forward all requests to get(..).
+         */
+        private Map cache = new HashMap();
 
         public AttachmentsProxy(WPContentContainer container) {
             super();
@@ -158,7 +166,16 @@ public class WPClientTemplateContext implements IOCContainerAware {
         }
 
         @Override
+        public boolean containsKey(Object key) {
+            return get( key ) != null;
+        }
+
+        @Override
         public Object get(Object key) {
+            // First check for cached responses - see comment on cache member.
+            if( cache.containsKey( key ) ) {
+                return cache.get( key );
+            }
             // The template placeholder is in the form {attachment.x}, where 'x' is an attachment
             // post ID. Read the attachment data from the posts DB and base on its 'location' value,
             // return one of the following:
@@ -194,6 +211,10 @@ public class WPClientTemplateContext implements IOCContainerAware {
                 }
             }
             // Else location == 'server' or other. Use the attachment URL to download from server.
+
+            // Cache the result before returning.
+            cache.put( key, url );
+            
             return url;
         }
     }
