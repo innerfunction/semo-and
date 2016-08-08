@@ -41,7 +41,7 @@ public class ContentTableViewCell extends ATableViewCell {
     public void setContent(String content) {
         TextView label = getDetailTextLabel();
         if( label != null ) {
-            label.setText( Html.fromHtml( content ) );
+            label.setText( Html.fromHtml( content ).toString().trim() );
             int height = label.getLineHeight() * label.getLineCount();
             label.setHeight( height );
         }
@@ -56,13 +56,15 @@ public class ContentTableViewCell extends ATableViewCell {
     }
 
     public int getCellHeight() {
-        TextView label = getDetailTextLabel();
-        if( label != null ) {
-            label.measure( 0, 0 );
-            int height = label.getLineHeight() * label.getLineCount();
-            return height;
+        TextView textLabel = getTextLabel();
+        textLabel.measure( 0, 0 );
+        int height = textLabel.getLineHeight();
+        TextView contentLabel = getDetailTextLabel();
+        if( contentLabel != null ) {
+            contentLabel.measure( 0, 0 );
+            height += contentLabel.getLineHeight() * contentLabel.getLineCount();
         }
-        return getTextLabel().getHeight();
+        return height;
     }
 
 }
