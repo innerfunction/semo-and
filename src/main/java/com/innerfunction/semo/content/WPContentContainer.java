@@ -108,6 +108,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     private WPAuthManager authManager;
     /** A HTTP client. */
     private Client httpClient;
+    /** File utilities. */
+    private Files files;
     /** The maximum number of rows to return for wp:search results. */
     private int searchResultLimit;
     /**
@@ -212,6 +214,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         httpClient.setAuthenticationDelegate( authManager );
 
         this.searchResultLimit = 100;
+
+        this.files = new Files( context );
     }
 
     /** Unpack packaged content. */
@@ -310,23 +314,28 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
         String postType = (String)postData.get("type");
         String templateName = String.format("template-%s.html", postType );
         String templatePath = Paths.join( baseContentPath, templateName );
-        if( !Files.fileExists( templatePath ) ) {
+        if( !files.fileRefExists( templatePath ) ) {
             templatePath = Paths.join( baseContentPath, "template-single.html");
-            if( !Files.fileExists( templatePath ) ) {
+            if( !files.fileRefExists( templatePath ) ) {
                 Log.w( Tag, String.format("Client template for post type '%s' not found at %s", postType, baseContentPath ) );
                 return null;
             }
         }
         // Assume at this point that the template file exists.
-        String template = Files.readString( templatePath );
+        String template = files.readStringFromRef( templatePath );
         // Generate the full post HTML using the post data and the client template.
         Object context = clientTemplateContext.makeTemplateContextForPostData( postData );
         // Render the post template
         String postHTML = renderTemplate( template, context );
         // Generate a content URL within the base content directory - this to ensure that references
         // to base content can be resolved as relative references.
+        /*
         String separator = (baseContentPath.endsWith("/") ? "" : "/");
         String contentURL = String.format("file://%s%s%s-%s.html", baseContentPath, separator, postType, postID );
+        */
+        String postFilename = String.format("%s-%s.html", postType, postID );
+        String contentRef = Paths.join( baseContentPath, postFilename );
+        String contentURL = Files.fileRefToURL( contentRef );
         // Add the post content and URL to the post data.
         postData.put("content", postHTML );
         postData.put("contentURL", contentURL );
@@ -483,7 +492,7 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     private String renderTemplate(String template, Object data) {
         String result = "";
         try {
-            Mustache.compiler().compile( template ).execute( data );
+            result = Mustache.compiler().compile( template ).execute( data );
         }
         catch(MustacheException me) {
             result = String.format("<h1>Template error</h1><pre>%s</pre>", me.getMessage() );
