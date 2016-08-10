@@ -53,7 +53,7 @@ public class FormTextFieldView extends FormFieldView {
 
         this.inputLayout = new LinearLayout( context );
         inputLayout.setGravity( Gravity.LEFT );
-        LayoutParams editLayoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
+        LayoutParams editLayoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         editLayoutParams.setMargins( 20, 0, 20, 20 );
         inputLayout.setLayoutParams( editLayoutParams );
 
@@ -77,7 +77,7 @@ public class FormTextFieldView extends FormFieldView {
     public void setInput(EditText input) {
         if( this.input != input ) {
             this.input = input;
-            input.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+            input.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT ) );
             inputLayout.removeAllViews();
             inputLayout.addView( input );
 

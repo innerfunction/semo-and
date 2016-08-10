@@ -27,7 +27,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.innerfunction.pttn.app.AppContainer;
+import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.semo.R;
 import com.innerfunction.util.Display;
 
@@ -109,25 +109,29 @@ public class FormFieldView extends FrameLayout {
 
     protected ViewGroup makeLabelPanel(Context context) {
         RelativeLayout labelPanel = new RelativeLayout( context );
-        labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT ) );
+        labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
         labelPanel.setBackgroundColor( Color.TRANSPARENT );
 
+        int textSize = Display.ptToPx( 12.0f );
+
         this.titleLabel = new TextView( context );
-        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
+        RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
         relParams.setMargins( 20, 0, 20, 20 );
         titleLabel.setLayoutParams( relParams );
         titleLabel.setGravity( Gravity.CENTER_VERTICAL );
+        titleLabel.setTextSize( textSize );
         titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         titleLabel.setSingleLine( true );
         labelPanel.addView( titleLabel );
 
         this.valueLabel = new TextView( context );
-        relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
+        relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
         relParams.setMargins( 20, 0, 20, 20 );
         valueLabel.setLayoutParams( relParams );
         valueLabel.setGravity( Gravity.END | Gravity.CENTER_VERTICAL );
+        valueLabel.setTextSize( textSize );
         valueLabel.setEllipsize( TextUtils.TruncateAt.END );
         valueLabel.setSingleLine( true );
         labelPanel.addView( valueLabel );
@@ -144,15 +148,19 @@ public class FormFieldView extends FrameLayout {
 
     public void setAccessoryView(View view) {
         accessoryPanel.removeAllViews();
+        ViewGroup.LayoutParams layoutParams = accessoryPanel.getLayoutParams();
         if( view != null ) {
             accessoryPanel.addView( view );
+            layoutParams.width = Display.dpToPx( 40 );
         }
+        else {
+            layoutParams.width = 0;
+        }
+        accessoryPanel.setLayoutParams( layoutParams );
     }
 
     protected void hideAccessoryView() {
-        ViewGroup.LayoutParams layoutParams = mainPanel.getLayoutParams();
-        layoutParams.width = LayoutParams.MATCH_PARENT;
-        mainPanel.setLayoutParams( layoutParams );
+        setAccessoryView( null );
     }
 
     public boolean takeFieldFocus() {
@@ -169,8 +177,10 @@ public class FormFieldView extends FrameLayout {
 
     public void onSelectField() {
         if( selectAction != null ) {
-            // TODO: Message isn't routed because FormFieldView instance provides no way into container hierarchy.
-            AppContainer.getAppContainer().postMessage( selectAction, this );
+            ViewController viewController = form.getViewController();
+            if( viewController != null ) {
+                viewController.postMessage( selectAction );
+            }
         }
     }
 
@@ -195,7 +205,7 @@ public class FormFieldView extends FrameLayout {
 
     public void showAccessoryImage(int imageID, int width, int height) {
         Drawable image = ContextCompat.getDrawable( getContext(), imageID );
-        showAccessoryImage( image, 50, 50 );
+        showAccessoryImage( image, 40, 40 );
     }
 
     public void showAccessoryImage(Drawable image, int width, int height) {
@@ -203,8 +213,6 @@ public class FormFieldView extends FrameLayout {
         imageView.setScaleType( ImageView.ScaleType.CENTER_CROP );
         imageView.setImageDrawable( image );
         // Set the image size
-        //width = Display.dpToPx( width );
-        //height = Display.dpToPx( height );
         imageView.setLayoutParams( new LayoutParams( width, height ) );
         setAccessoryView( imageView );
     }
@@ -257,8 +265,6 @@ public class FormFieldView extends FrameLayout {
         layoutParams.height = Display.dpToPx( height );
         setLayoutParams( layoutParams );
     }
-
-    public int getConfiguredHeight() { return height; }
 
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
