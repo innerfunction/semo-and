@@ -258,6 +258,8 @@ public class FormFieldView extends FrameLayout {
         setLayoutParams( layoutParams );
     }
 
+    public int getConfiguredHeight() { return height; }
+
     public void setBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
     }

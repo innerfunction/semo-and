@@ -340,6 +340,7 @@ public class FormView extends ScrollView {
         fieldLayout.removeAllViews();
         this.fields = fields;
         this.defaultValues = new HashMap<>();
+        int height = 0;
         for( FormFieldView field : fields ) {
             field.setForm( this );
             String name = field.getName();
@@ -351,11 +352,13 @@ public class FormView extends ScrollView {
                 this.loadingIndicator = (LoadingIndicator)field;
             }
             fieldLayout.addView( field );
+            height += field.getConfiguredHeight();
         }
         // If input values have already been set then set again so that field values are populated.
         if( inputValues != null ) {
             setInputValues( inputValues );
         }
+        fieldLayout.setMinimumHeight( height );
     }
 
     public void setMethod(String method) {

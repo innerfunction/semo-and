@@ -15,21 +15,29 @@ package com.innerfunction.semo.content.ui;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.text.Html;
+import android.text.TextUtils;
 import android.widget.TextView;
 
 import com.nakardo.atableview.view.ATableViewCell;
 
 /**
+ * Table cell implementation for the content table view.
+ * Note on cell heights: The iOS implementation dynamically adjusts the height of each cell to
+ * match the height of the content text, but due to problems in this class with calculating text
+ * height (particularly on the initial pass; and probably related to the underlying ATableView
+ * adapater being used) this class just uses a fixed cell and content text height.
  * Created by juliangoacher on 25/07/16.
  */
 public class ContentTableViewCell extends ATableViewCell {
 
+    private int contentLineCount = 2;
+
     public ContentTableViewCell(ATableViewCell.ATableViewCellStyle style, String reuseIdentifier, Context context) {
         super( style, reuseIdentifier, context );
         /*
+        getBackgroundView().setBackgroundColor( Color.YELLOW );
+        setBackgroundColor( Color.WHITE );
         getTextLabel().setBackgroundColor( Color.CYAN );
         TextView detail = getDetailTextLabel();
         if( detail != null ) {
@@ -52,13 +60,9 @@ public class ContentTableViewCell extends ATableViewCell {
         if( label != null ) {
             String text = Html.fromHtml( content ).toString().trim();
             label.setText( text );
-            // This calculation is repeated in the getCellHeight() method, but it is necessary to
-            // do it here to ensure that multi-line display.
-            int height = label.getLineHeight() * label.getLineCount();
-            label.setHeight( height );
-            // TODO There is a problem here in that the first page's worth of cells always calculate
-            // TODO a height of 0 at this point; this probably happens because the cell hasn't been
-            // TODO attached to the window yet.
+            label.setLines( contentLineCount );
+            label.setEllipsize( TextUtils.TruncateAt.END );
+            label.setHeight( label.getLineHeight() * contentLineCount );
         }
     }
 
@@ -73,38 +77,15 @@ public class ContentTableViewCell extends ATableViewCell {
     public int getCellHeight() {
         TextView textLabel = getTextLabel();
         textLabel.measure( 0, 0 );
-        /*
-        final int titleHeight = textLabel.getLineHeight();
-        final int contentHeight = getContentHeight();
-        post( new Runnable() {
-            @Override
-            public void run() {
-                getTextLabel().setHeight( titleHeight );
-                getTextLabel().setText("CH:"+contentHeight);
-                if( contentHeight > 0 ) {
-                    getDetailTextLabel().setHeight( contentHeight );
-                }
-            }
-        });
-        */
-        int titleHeight = textLabel.getLineHeight();
-        int contentHeight = getContentHeight();
+        int titleHeight = (int)textLabel.getTextSize();
         getTextLabel().setHeight( titleHeight );
-        if( contentHeight > 0 ) { // This check in case of null detail label
-            getDetailTextLabel().setHeight( contentHeight );
-        }
-        return titleHeight + contentHeight;
-    }
-
-    public int getContentHeight() {
-        int height = 0;
+        int contentHeight = 0;
         TextView contentLabel = getDetailTextLabel();
         if( contentLabel != null ) {
-            contentLabel.measure( 0, 0 );
-            height = contentLabel.getLineHeight() * contentLabel.getLineCount();
-            contentLabel.setHeight( height );
+            contentHeight = (int)contentLabel.getTextSize() * (contentLineCount - 1);
+            contentLabel.setHeight( contentHeight );
         }
-        return height;
+        return titleHeight + contentHeight;
     }
 
 }

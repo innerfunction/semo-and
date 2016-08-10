@@ -13,11 +13,15 @@
 // limitations under the License
 package com.innerfunction.semo.content.ui;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.innerfunction.pttn.app.AppContainer;
-import com.innerfunction.pttn.ui.table.TableViewCellFactory;
 import com.innerfunction.pttn.ui.table.TableViewController;
 import com.innerfunction.semo.content.DataFormatter;
 import com.innerfunction.util.StringTemplate;
@@ -48,6 +52,14 @@ public class ContentTableViewController extends TableViewController {
     }
 
     @Override
+    public View onCreateView(Activity activity) {
+        View view = super.onCreateView( activity );
+        tableView.setSeparatorStyle( ATableViewCell.ATableViewCellSeparatorStyle.SingleLine );
+        //tableView.setSeparatorColor( Color.LTGRAY );
+        return view;
+    }
+
+    @Override
     public void setContent(Object content) {
         if( dataFormatter != null ) {
             content = dataFormatter.formatData( content );
@@ -70,8 +82,17 @@ public class ContentTableViewController extends TableViewController {
         int defaultImageWidth = rowImageWidth != 0 ? rowImageWidth : imageHeight;
         int imageWidth = data.getNumber("imageWidth", defaultImageWidth ).intValue();
         Drawable image = tableData.loadImage( data.getString("image") ); // TODO Resize the image?
+        if( image == null ) {
+            image = rowImage;
+        }
         if( image != null ) {
-            cell.getImageView().setImageDrawable( image );
+            ImageView imageView = cell.getImageView();
+            imageView.setImageDrawable( image );
+            imageView.setScaleType( ImageView.ScaleType.CENTER_INSIDE );
+            ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+            layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            layoutParams.width = imageWidth;
+            imageView.setLayoutParams( layoutParams );
             // TODO Rounded corners
         }
         else {
@@ -84,6 +105,8 @@ public class ContentTableViewController extends TableViewController {
         else {
             cell.setAccessoryType( ATableViewCellAccessoryView.ATableViewCellAccessoryType.None );
         }
+
+        cell.setSelectionStyle( ATableViewCell.ATableViewCellSelectionStyle.Gray );
     }
 
     protected String getReuseID() {
@@ -116,14 +139,10 @@ public class ContentTableViewController extends TableViewController {
             public ATableViewCell cellForRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
                 String reuseID = getReuseID();
                 ATableViewCell cell = dequeueReusableCellWithIdentifier( reuseID );
-                if( cell instanceof ContentTableViewCell ) {
-                    configureCell( (ContentTableViewCell)cell, indexPath );
+                if( !(cell instanceof ContentTableViewCell) ) {
+                    cell = makeTableViewCell( reuseID );
                 }
-                else {
-                    ContentTableViewCell ctvCell = makeTableViewCell( reuseID );
-                    configureCell( ctvCell, indexPath );
-                    cell = ctvCell;
-                }
+                configureCell( (ContentTableViewCell)cell, indexPath );
                 return cell;
             }
         };
