@@ -60,6 +60,7 @@ public class FormTextFieldView extends FormFieldView {
         EditText input = new EditText( context );
         input.setTextColor( Color.BLACK );
         input.setHintTextColor( Color.GRAY );
+        input.setBackgroundResource( android.R.drawable.editbox_background_normal );
         input.setSingleLine();
         input.setInputType( InputType.TYPE_CLASS_TEXT );
         setInput( input );
