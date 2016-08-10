@@ -15,6 +15,8 @@ package com.innerfunction.semo.form;
 
 import android.content.Context;
 
+import com.innerfunction.semo.R;
+
 import java.util.List;
 
 /**
@@ -48,8 +50,14 @@ public class FormOptionFieldView extends FormFieldView {
 
     public void setOptionSelected(boolean selected) {
         this.optionSelected = selected;
-        setValue( selected ? optionValue : null );
-        // TODO Set accessory type
+        if( selected ) {
+            setValue( optionValue );
+            showAccessoryImage( R.drawable.checkmark, 50, 50 );
+        }
+        else {
+            setValue( null );
+            hideAccessoryView();
+        }
     }
 
     public boolean getOptionSelected() {

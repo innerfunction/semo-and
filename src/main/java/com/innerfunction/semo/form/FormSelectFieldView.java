@@ -156,7 +156,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
             @Override
             public void didSelectRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
                 FormSelectFieldView field = FormSelectFieldView.this;
-                field.selectedItem = field.items.get( indexPath.getRow() );
+                field.setSelectedItem( field.items.get( indexPath.getRow() ) );
                 field.releaseFieldFocus();
             }
             @Override
@@ -172,8 +172,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
         itemsListView.setContent( items );
         itemsListView.afterIOCConfigure( configuration );
         if( selectedIndex > -1 ) {
-            NSIndexPath selectedIndexPath = NSIndexPath.indexPathForRowInSection( selectedIndex, 0 );
-            itemsListView.getTableView().selectRowAtIndexPath( selectedIndexPath );
+            itemsListView.setSelectedIndex( selectedIndex );
         }
 
         // Present the select list in a modal.

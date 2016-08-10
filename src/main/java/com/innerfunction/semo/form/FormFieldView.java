@@ -190,7 +190,7 @@ public class FormFieldView extends FrameLayout {
     }
 
     public void showDisclosureIndicator() {
-        showAccessoryImage( R.drawable.right_arrow, 50, 50 );
+        showAccessoryImage( R.drawable.right_arrow, 40, 40 );
     }
 
     public void showAccessoryImage(int imageID, int width, int height) {
@@ -203,8 +203,8 @@ public class FormFieldView extends FrameLayout {
         imageView.setScaleType( ImageView.ScaleType.CENTER_CROP );
         imageView.setImageDrawable( image );
         // Set the image size
-        width = Display.dpToPx( width );
-        height = Display.dpToPx( height );
+        //width = Display.dpToPx( width );
+        //height = Display.dpToPx( height );
         imageView.setLayoutParams( new LayoutParams( width, height ) );
         setAccessoryView( imageView );
     }
