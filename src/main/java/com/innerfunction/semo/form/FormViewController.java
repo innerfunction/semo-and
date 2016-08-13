@@ -29,6 +29,7 @@ public class FormViewController extends ViewController {
     public FormViewController(Context context) {
         super( context );
         setLayoutName("view_activity_layout");
+        setHideTitleBar( false );
         this.form = new FormView( context );
         form.setViewController( this );
     }
@@ -41,6 +42,7 @@ public class FormViewController extends ViewController {
 
     @Override
     public void onResume() {
+        super.onResume();
         form.refresh();
     }
 

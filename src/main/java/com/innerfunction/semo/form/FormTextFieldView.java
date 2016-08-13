@@ -16,6 +16,7 @@ package com.innerfunction.semo.form;
 import android.content.Context;
 import android.graphics.Color;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.text.method.PasswordTransformationMethod;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -154,10 +155,11 @@ public class FormTextFieldView extends FormFieldView {
         }
         strValue = strValue.trim();
         super.setValue( strValue );
-        setValueLabel( formatValue( strValue ) );
+        String formattedValue = formatValue( strValue );
+        setValueLabel( formattedValue );
         // Set title size and alignment according to whether there is a value or not.
         ViewGroup.LayoutParams layoutParams = titleLabel.getLayoutParams();
-        final boolean hasValue = strValue.length() > 0;
+        final boolean hasValue = formattedValue.length() > 0;
         if( hasValue ) {
             titleLabel.setGravity( defaultTitleAlignment );
             // Adjust width if value label needs space to display fully.
@@ -168,8 +170,13 @@ public class FormTextFieldView extends FormFieldView {
             valueLabel.measure( 0, 0 );
             int valueWidth = valueLabel.getMeasuredWidth();
             int overflow = totalWidth - titleWidth - valueWidth;
-            if( overflow < 0 ) {
-                layoutParams.width = totalWidth - overflow;
+            int spacing = 50; // The minimum space between title and value labels.
+            if( overflow < spacing ) {
+                titleWidth = Math.max( (titleWidth + overflow) - spacing, 0 );
+                if( titleWidth < 150 ) {
+                    titleWidth = 0; // Just hide the title completely if less than 150px wide.
+                }
+                layoutParams.width = titleWidth;
             }
             else {
                 layoutParams.width = LayoutParams.WRAP_CONTENT;
@@ -180,6 +187,7 @@ public class FormTextFieldView extends FormFieldView {
             layoutParams.width = LayoutParams.MATCH_PARENT;
         }
         titleLabel.setLayoutParams( layoutParams );
+        titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         validate();
     }
 

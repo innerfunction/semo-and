@@ -123,6 +123,8 @@ public class FormFieldView extends FrameLayout {
         titleLabel.setTextSize( textSize );
         titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         titleLabel.setSingleLine( true );
+        titleLabel.setMaxLines( 1 );
+        //titleLabel.setHorizontallyScrolling( true );
         labelPanel.addView( titleLabel );
 
         this.valueLabel = new TextView( context );
@@ -281,6 +283,10 @@ public class FormFieldView extends FrameLayout {
     public void setTitle(String title) {
         this.title = title;
         titleLabel.setText( title );
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public TextView getTitleLabel() {

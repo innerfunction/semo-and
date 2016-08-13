@@ -168,6 +168,11 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
                 return cell;
             }
         };
+        itemsListView.setTitle( getTitle() );
+        ViewController parentViewController = getForm().getViewController();
+        if( parentViewController != null ) {
+            itemsListView.setTitleBar( parentViewController.getTitleBar() );
+        }
         itemsListView.setIOCContainer( container );
         itemsListView.setContent( items );
         itemsListView.afterIOCConfigure( configuration );
