@@ -88,7 +88,8 @@ public class ContentTableViewController extends TableViewController {
         if( image != null ) {
             ImageView imageView = cell.getImageView();
             imageView.setImageDrawable( image );
-            imageView.setScaleType( ImageView.ScaleType.CENTER_INSIDE );
+            //imageView.setScaleType( ImageView.ScaleType.CENTER_INSIDE );
+            imageView.setScaleType( ImageView.ScaleType.FIT_START );
             ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
             layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
             layoutParams.width = imageWidth;
