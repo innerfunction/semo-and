@@ -121,10 +121,12 @@ public class FormFieldView extends FrameLayout {
         titleLabel.setLayoutParams( relParams );
         titleLabel.setGravity( Gravity.CENTER_VERTICAL );
         titleLabel.setTextSize( textSize );
+        // TODO Note that ellipsize isn't working in all cases.
         titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         titleLabel.setSingleLine( true );
         titleLabel.setMaxLines( 1 );
-        //titleLabel.setHorizontallyScrolling( true );
+        titleLabel.setHorizontalFadingEdgeEnabled( true );
+        titleLabel.setFadingEdgeLength( 50 );
         labelPanel.addView( titleLabel );
 
         this.valueLabel = new TextView( context );

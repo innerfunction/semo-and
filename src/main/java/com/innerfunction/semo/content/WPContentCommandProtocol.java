@@ -312,7 +312,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
             packagedContentPath = this.packagedContentPath;
         }
         // TODO Re-enable this once problems with db are debugged.
-        boolean RUN_THIS_CODE = false;
+        boolean RUN_THIS_CODE = true;
         if( RUN_THIS_CODE && packagedContentPath != null ) {
             try {
                 Date startTime = new Date();
@@ -334,7 +334,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
                     }
                 }
                 Date endTime = new Date();
-                Log.d( Tag, String.format( "Content unpack took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
+                Log.d( Tag, String.format("Content unpack took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
                 // Schedule command to unzip base content if the base content zip exists.
                 String baseContentPath = Paths.join( packagedContentPath, "base-content.zip" );
                 if( assets.assetExists( baseContentPath ) ) {
@@ -363,7 +363,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
             "AND to_delete.depth < 2)", postID, postID );
 
         // Re-insert entries for all direct children of the current post.
-        postDB.performUpdate("INSERT INTO closures (parent, child, depth"+
+        postDB.performUpdate("INSERT INTO closures (parent, child, depth) "+
             "SELECT parent, id, 1 FROM posts WHERE parent = ?", postID );
 
         insertClosureEntriesForPost( post );
@@ -406,6 +406,8 @@ public class WPContentCommandProtocol extends CommandProtocol {
                 "FROM closures p, closures c "+
                 "WHERE p.child = ? AND c.parent = ?", parent, postID );
         }
+
+        postDB.getConnection().yieldIfContendedSafely();
     }
 
     private void rebuildClosureTable(List<Map<String,Object>> posts) {

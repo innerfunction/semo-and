@@ -19,6 +19,7 @@ import com.innerfunction.q.Q;
 import com.innerfunction.semo.commands.Command;
 import com.innerfunction.semo.commands.CommandScheduler;
 import com.innerfunction.semo.commands.CommandScheduler.CommandItem;
+import com.innerfunction.util.Files;
 
 import android.os.Handler;
 
@@ -108,7 +109,7 @@ public class GetURLCommand implements Command {
                                 @Override
                                 public Response result(Response response) {
                                     // Copy downloaded file to target location.
-                                    response.getDataFile().renameTo( new File( filename ) );
+                                    Files.mv( response.getDataFile(), new File( filename ) );
                                     promise.resolve( CommandScheduler.NoFollowOns );
                                     return response;
                                 }

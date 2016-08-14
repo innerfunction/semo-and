@@ -226,6 +226,7 @@ public class CommandScheduler implements Service {
                 else {
                     db.performUpdate("UPDATE queue SET status='X' WHERE status='P'");
                 }
+                db.commitTransaction();
             }
         };
         // If already running on the exec queue the run the purge synchronously; else add to end of
@@ -251,6 +252,7 @@ public class CommandScheduler implements Service {
                 else {
                     db.performUpdate("UPDATE queue SET status='X' WHERE status='P' AND batch=?", batch );
                 }
+                db.commitTransaction();
             }
         };
         // If already running on the exec queue the run the purge synchronously; else add to end of
@@ -349,6 +351,7 @@ public class CommandScheduler implements Service {
 
     /** Continue queue processing after execution a command. */
     private void continueQueueProcessingAfterCommand(String rowID) {
+        db.beginTransaction();
         // Delete the command record from the queue.
         if( deleteExecutedQueueRecords ) {
             db.delete("queue", rowID );
@@ -359,6 +362,7 @@ public class CommandScheduler implements Service {
             values.put("status", "X");
             db.update("queue", values );
         }
+        db.commitTransaction();
         // Continue to next queued command.
         executeNextCommand();
     }

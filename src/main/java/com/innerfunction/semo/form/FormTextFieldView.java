@@ -187,7 +187,6 @@ public class FormTextFieldView extends FormFieldView {
             layoutParams.width = LayoutParams.MATCH_PARENT;
         }
         titleLabel.setLayoutParams( layoutParams );
-        titleLabel.setEllipsize( TextUtils.TruncateAt.END );
         validate();
     }
 
