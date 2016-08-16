@@ -255,6 +255,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
         // & media items.
         postDB.beginTransaction();
         try {
+            Date startTime = new Date();
             for( Map<String, Object> item : feedItems ) {
                 String type = KeyPath.getValueAsString( "type", item );
                 if( BaseContentType.equals( type ) ) {
@@ -264,7 +265,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
                     commands.add( new CommandItem( "rm", baseContentFile ) );
                 }
                 else {
-                    // Upadate post item in database.
+                    // Update a post item in database.
                     String status = KeyPath.getValueAsString( "status", item );
                     if( "trash".equals( status ) ) {
                         // Item is deleted.
@@ -291,8 +292,11 @@ public class WPContentCommandProtocol extends CommandProtocol {
                             commands.add( new CommandItem( "get", item.get( "url" ), filepath, 2 ) );
                         }
                     }
+                    postDB.getConnection().yieldIfContendedSafely();
                 }
             }
+            Date endTime = new Date();
+            Log.d( Tag, String.format("Content deploy took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
         }
         finally {
             postDB.commitTransaction();

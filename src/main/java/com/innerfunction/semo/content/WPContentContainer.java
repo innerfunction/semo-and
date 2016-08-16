@@ -76,6 +76,11 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     private String baseContentPath;
     /** The location of downloaded post content once deployed. */
     private String contentPath;
+    /**
+     * The location of an optional pre-built copy of the content database.
+     * If used, then this is typically packaged with the app.
+     */
+    private String initialDBImagePath;
     /** The scheme name the URI handler is bound to; defaults to wp: */
     private String uriSchemeName;
     /** The WP realm name. Used for authentication, defaults to 'semo'. */
@@ -222,9 +227,19 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     public void unpackPackagedContent() {
         int count = postDB.countInTable("posts", "1=1");
         if( count == 0 ) {
-            commandScheduler.appendCommand("content.unpack");
-            // Note: executeQueue() isn't called here but is called by the startService() method
-            // after this method is called.
+            if( initialDBImagePath != null ) {
+                // Deploy the initial db image. Note that this happens synchronously, so will
+                // potentially lock the app until the deploy is completed; this should happen
+                // during app startup, whilst the splash screen is displayed.
+                long startTime = System.currentTimeMillis();
+                postDB.deployDBFile( initialDBImagePath );
+                Log.d( Tag, String.format("DB image deploy took %d s", System.currentTimeMillis() - startTime ));
+            }
+            else {
+                commandScheduler.appendCommand( "content.unpack" );
+                // Note: executeQueue() isn't called here but is called by the startService() method
+                // after this method is called.
+            }
         }
     }
 
@@ -639,6 +654,10 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
 
     public void setContentPath(String path) {
         this.contentPath = path;
+    }
+
+    public void setInitialDBImagePath(String path) {
+        this.initialDBImagePath = path;
     }
 
     public void setUriSchemeName(String name) {

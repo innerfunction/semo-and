@@ -23,7 +23,9 @@ import android.util.Log;
 
 import com.innerfunction.pttn.IOCContextAware;
 import com.innerfunction.pttn.Service;
+import com.innerfunction.util.Files;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -151,9 +153,7 @@ public class DB implements Service, IOCContextAware {
      * Open a writeable database connection and begin a transaction.
      */
     public boolean beginTransaction() {
-        //db.beginTransactionNonExclusive();
         db.beginTransaction();
-//        db.execSQL("begin immediate transaction");
         return true;
     }
 
@@ -598,15 +598,33 @@ public class DB implements Service, IOCContextAware {
         return cvalues;
     }
 
-    /** Create and return a new instance of this database connection. */
+    /**
+     * Create and return a new instance of this database connection.
+     * @deprecated This pattern isn't applicable to Android; all client code should reference the
+     * same DB instance. Current implementation of this method returns 'this'.
+     */
     public DB newInstance() {
-        // TODO Review this; idea is that there should only be one connection per db.
         /*
         DB db = new DB( this );
         db.startService();
         return db;
         */
         return this;
+    }
+
+    /**
+     * Deploy a database file by copying to the live database location.
+     * This method is used when the app is packaged with a pre-built and pre-populated copy of the
+     * database (i.e. pre-built - table scheme is setup; pre-populated - initial data already
+     * written). This will replace any in-situ database file.
+     * @param source The path to the file to be copied.
+     */
+    public void deployDBFile(String source) {
+        stopService(); // Stop the service - this will close the current db connection.
+        File target = androidContext.getDatabasePath( name );
+        Files files = new Files( androidContext );
+        files.mvFileRef( source, target.getAbsolutePath() );
+        startService(); // Restart the service - this will reopen the db connection.
     }
 
     // Service interface
