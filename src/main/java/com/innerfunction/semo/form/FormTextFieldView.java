@@ -31,6 +31,7 @@ import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
 
 import com.innerfunction.semo.R;
+import com.nineoldandroids.animation.Animator;
 
 /**
  * Attached by juliangoacher on 28/05/16.
@@ -209,22 +210,26 @@ public class FormTextFieldView extends FormFieldView {
             // Animate transition to edit view.
             removeView( cellLayout );
             addView( inputLayout );
-            YoYo.with( Techniques.FlipInX ).duration( 600 ).playOn( this );
-            // Focus input and show keyboard after transition.
-            this.post(new Runnable() {
-                @Override
-                public void run() {
-                    inputLayout.postDelayed( new Runnable() {
-                        @Override
-                        public void run() {
-                            inputLayout.requestFocus();
-                            InputMethodManager keyboard
-                                = (InputMethodManager)getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
-                            keyboard.showSoftInput( inputLayout, 0 );
-                        }
-                    }, 1000);
-                }
-            });
+            YoYo
+                .with( Techniques.FlipInX )
+                .withListener(new Animator.AnimatorListener() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {}
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        // Focus input and show keyboard after transition.
+                        input.requestFocus();
+                        InputMethodManager keyboard
+                            = (InputMethodManager)getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
+                        keyboard.showSoftInput( input, InputMethodManager.SHOW_IMPLICIT );
+                    }
+                    @Override
+                    public void onAnimationCancel(Animator animation) {}
+                    @Override
+                    public void onAnimationRepeat(Animator animation) {}
+                })
+                .duration( 600 )
+                .playOn( this );
         }
         return focusable;
     }
