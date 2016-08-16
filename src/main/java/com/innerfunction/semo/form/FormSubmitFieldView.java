@@ -14,8 +14,11 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 /**
  * Attached by juliangoacher on 25/05/16.
@@ -27,9 +30,11 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
     public FormSubmitFieldView(Context context) {
         super( context );
         setIsSelectable( true );
-        this.loadingIndicator = new ProgressBar( context, null, android.R.style.Widget_ProgressBar_Small );
+        this.loadingIndicator = new ProgressBar( context );//, null, android.R.style.Widget_ProgressBar_Small );
         loadingIndicator.setIndeterminate( true );
         loadingIndicator.setLayoutParams( new FrameLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+        loadingIndicator.setVisibility( View.GONE );
+        labelPanel.addView( loadingIndicator );
     }
 
     @Override
@@ -39,11 +44,14 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
 
     @Override
     public void showFormLoading(boolean loading) {
+        TextView titleLabel = getTitleLabel();
         if( loading ) {
-            setMainView( loadingIndicator );
+            titleLabel.setAlpha( 0.35f );
+            loadingIndicator.setVisibility( View.VISIBLE );
         }
         else {
-            setMainView( labelPanel );
+            loadingIndicator.setVisibility( View.GONE );
+            titleLabel.setAlpha( 1.0f );
         }
     }
 }

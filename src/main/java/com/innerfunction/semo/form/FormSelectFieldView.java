@@ -137,7 +137,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
     @Override
     public boolean takeFieldFocus() {
         // Try to find index of selected list item.
-        int index = -1;
+        int index = 0;
         Object value = getValue();
         if( value == null && nullItem != null ) {
             index = 0;
@@ -156,7 +156,8 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
             @Override
             public void didSelectRowAtIndexPath(com.nakardo.atableview.view.ATableView tableView, NSIndexPath indexPath) {
                 FormSelectFieldView field = FormSelectFieldView.this;
-                field.setSelectedItem( field.items.get( indexPath.getRow() ) );
+                int selectedRow = indexPath.getRow();
+                field.setSelectedItem( field.items.get( selectedRow ) );
                 field.releaseFieldFocus();
             }
             @Override
@@ -176,9 +177,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
         itemsListView.setIOCContainer( container );
         itemsListView.setContent( items );
         itemsListView.afterIOCConfigure( configuration );
-        if( selectedIndex > -1 ) {
-            itemsListView.setSelectedIndex( selectedIndex );
-        }
+        itemsListView.setSelectedIndex( selectedIndex );
 
         // Present the select list in a modal.
         ViewController viewController = getForm().getViewController();

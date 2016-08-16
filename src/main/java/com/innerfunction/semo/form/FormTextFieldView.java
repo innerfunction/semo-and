@@ -159,35 +159,43 @@ public class FormTextFieldView extends FormFieldView {
         String formattedValue = formatValue( strValue );
         setValueLabel( formattedValue );
         // Set title size and alignment according to whether there is a value or not.
-        ViewGroup.LayoutParams layoutParams = titleLabel.getLayoutParams();
+        final ViewGroup.LayoutParams layoutParams = titleLabel.getLayoutParams();
         final boolean hasValue = formattedValue.length() > 0;
-        if( hasValue ) {
-            titleLabel.setGravity( defaultTitleAlignment );
-            // Adjust width if value label needs space to display fully.
-            int totalWidth = getLabelPanel().getMeasuredWidth();
-            titleLabel.measure( 0, 0 );
-            int titleWidth = titleLabel.getMeasuredWidth();
-            TextView valueLabel = getValueLabel();
-            valueLabel.measure( 0, 0 );
-            int valueWidth = valueLabel.getMeasuredWidth();
-            int overflow = totalWidth - titleWidth - valueWidth;
-            int spacing = 50; // The minimum space between title and value labels.
-            if( overflow < spacing ) {
-                titleWidth = Math.max( (titleWidth + overflow) - spacing, 0 );
-                if( titleWidth < 150 ) {
-                    titleWidth = 0; // Just hide the title completely if less than 150px wide.
+        // Post the code so that it runs after the field view has been layed out (i.e. so that
+        // measured widths can be read).
+        post( new Runnable() {
+            @Override
+            public void run() {
+                if( hasValue ) {
+                    titleLabel.setGravity( defaultTitleAlignment );
+                    // Adjust width if value label needs space to display fully.
+                    int totalWidth = getLabelPanel().getMeasuredWidth();
+                    titleLabel.measure( 0, 0 );
+                    int titleWidth = titleLabel.getMeasuredWidth();
+                    TextView valueLabel = getValueLabel();
+                    valueLabel.measure( 0, 0 );
+                    int valueWidth = valueLabel.getMeasuredWidth();
+                    int overflow = totalWidth - titleWidth - valueWidth;
+                    int spacing = 50; // The minimum space between title and value labels.
+                    if( overflow < spacing ) {
+                        titleWidth = Math.max( (titleWidth + overflow) - spacing, 0 );
+                        if( titleWidth < 150 ) {
+                            titleWidth = 0; // Just hide the title completely if less than 150px wide.
+                        }
+                        layoutParams.width = titleWidth;
+                    }
+                    else {
+                        layoutParams.width = LayoutParams.WRAP_CONTENT;
+                    }
                 }
-                layoutParams.width = titleWidth;
+                else {
+                    titleLabel.setGravity( Gravity.CENTER );
+                    layoutParams.width = LayoutParams.MATCH_PARENT;
+                }
+                titleLabel.setLayoutParams( layoutParams );
+
             }
-            else {
-                layoutParams.width = LayoutParams.WRAP_CONTENT;
-            }
-        }
-        else {
-            titleLabel.setGravity( Gravity.CENTER );
-            layoutParams.width = LayoutParams.MATCH_PARENT;
-        }
-        titleLabel.setLayoutParams( layoutParams );
+        });
         validate();
     }
 

@@ -171,9 +171,7 @@ public class FormFieldView extends FrameLayout {
         return false;
     }
 
-    public void releaseFieldFocus() {
-
-    }
+    public void releaseFieldFocus() {}
 
     public boolean validate() {
         return true;

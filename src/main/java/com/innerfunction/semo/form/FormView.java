@@ -44,6 +44,8 @@ public class FormView extends ScrollView {
 
     static final String Tag = FormView.class.getSimpleName();
 
+    static final int FooterHeight = 50;
+
     /**
      * An interface implemented by form fields capable of acting as form loading indicators.
      */
@@ -90,6 +92,8 @@ public class FormView extends ScrollView {
     private Map<String,Object> inputValues;
     /** The list of form fields. */
     private List<FormFieldView> fields;
+    /** A spacer at the end of the field list. */
+    private View footerView;
     /** The form submit method, e.g. GET or POST. */
     private String method;
     /** The URL to submit the form to. */
@@ -122,6 +126,9 @@ public class FormView extends ScrollView {
 
         setBackgroundColor( Color.LTGRAY );
 
+        this.footerView = new View( context );
+        footerView.setBackgroundColor( Color.TRANSPARENT );
+        footerView.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, FooterHeight ) );
     }
 
     /** Set the form's HTTP client. */
@@ -257,12 +264,20 @@ public class FormView extends ScrollView {
             }
             else if( submitURI != null ) {
                 showSubmittingAppearance( true );
-                // The submit URI is an internal URI which the form will post as a message.
-                // The URI property is treated as a template into which the form's values can be
-                // inserted.
-                String message = StringTemplate.render( submitURI, getInputValues(), true );
-                AppContainer.getAppContainer().postMessage( message, this );
-                showSubmittingAppearance( false );
+                // A post delayed is used here to allow time for the UI to redraw before posting
+                // the action message, which could be potentially expensive.
+                // TODO Need to examine ways to post messages on background threads.
+                postDelayed( new Runnable() {
+                    @Override
+                    public void run() {
+                        // The submit URI is an internal URI which the form will post as a message.
+                        // The URI property is treated as a template into which the form's values
+                        // can be inserted.
+                        String message = StringTemplate.render( submitURI, getInputValues(), true );
+                        AppContainer.getAppContainer().postMessage( message, getViewController() );
+                        showSubmittingAppearance( false );
+                    }
+                }, 100);
             }
         }
         return ok;
@@ -352,6 +367,7 @@ public class FormView extends ScrollView {
             }
             fieldLayout.addView( field );
         }
+        fieldLayout.addView( footerView );
         // If input values have already been set then set again so that field values are populated.
         if( inputValues != null ) {
             setInputValues( inputValues );
