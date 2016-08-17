@@ -56,7 +56,7 @@ public class FormOptionFieldView extends FormFieldView {
         }
         else {
             setValue( null );
-            showAccessoryImage( null, 0 , 0 );
+            showAccessoryImage( null, 0, 0, 0 );
         }
     }
 

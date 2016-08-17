@@ -83,10 +83,8 @@ public class FormFieldView extends FrameLayout {
     public FormFieldView(Context context) {
         super( context );
 
-        LayoutParams layoutParams = new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
-        int margins = Display.dpToPx( 40 );
-        layoutParams.setMargins( margins, margins, margins, margins );
-        setLayoutParams( layoutParams );
+        int padding = Display.dpToPx( 5 );
+        setPadding( padding, padding, padding, padding );
 
         LayoutInflater inflater = LayoutInflater.from( context );
         this.cellLayout = inflater.inflate( R.layout.formfield_cell_layout, this, false );
@@ -96,6 +94,9 @@ public class FormFieldView extends FrameLayout {
         this.accessoryPanel = (FrameLayout)cellLayout.findViewById( R.id.accessory_panel );
 
         this.labelPanel = makeLabelPanel( context );
+        // Adding additional padding to the bottom of the label panel improves the overall look
+        // of form layouts.
+        labelPanel.setPadding( 0, 0, 0, padding );
         this.valueLabel.setVisibility( INVISIBLE );
         setMainView( labelPanel );
 
@@ -117,7 +118,7 @@ public class FormFieldView extends FrameLayout {
         this.titleLabel = new TextView( context );
         RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE );
-        relParams.setMargins( 20, 0, 20, 20 );
+        //relParams.setMargins( 20, 0, 20, 20 );
         titleLabel.setLayoutParams( relParams );
         titleLabel.setGravity( Gravity.CENTER_VERTICAL );
         titleLabel.setTextSize( textSize );
@@ -132,7 +133,7 @@ public class FormFieldView extends FrameLayout {
         this.valueLabel = new TextView( context );
         relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
         relParams.addRule( RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE );
-        relParams.setMargins( 20, 0, 20, 20 );
+        //relParams.setMargins( 20, 0, 20, 20 );
         valueLabel.setLayoutParams( relParams );
         valueLabel.setGravity( Gravity.END | Gravity.CENTER_VERTICAL );
         valueLabel.setTextSize( textSize );
@@ -148,23 +149,6 @@ public class FormFieldView extends FrameLayout {
         if( view != null ) {
             mainPanel.addView( view );
         }
-    }
-
-    public void setAccessoryView(View view) {
-        accessoryPanel.removeAllViews();
-        ViewGroup.LayoutParams layoutParams = accessoryPanel.getLayoutParams();
-        if( view != null ) {
-            accessoryPanel.addView( view );
-            layoutParams.width = Display.dpToPx( 40 );
-        }
-        else {
-            layoutParams.width = 0;
-        }
-        accessoryPanel.setLayoutParams( layoutParams );
-    }
-
-    protected void hideAccessoryView() {
-        setAccessoryView( null );
     }
 
     public boolean takeFieldFocus() {
@@ -202,21 +186,44 @@ public class FormFieldView extends FrameLayout {
     }
 
     public void showDisclosureIndicator() {
-        showAccessoryImage( R.drawable.right_arrow, 40, 40 );
+        showAccessoryImage( R.drawable.right_arrow, 40, 40, 10 );
     }
 
     public void showAccessoryImage(int imageID, int width, int height) {
-        Drawable image = ContextCompat.getDrawable( getContext(), imageID );
-        showAccessoryImage( image, 40, 40 );
+        showAccessoryImage( imageID, width, height, 0 );
     }
 
-    public void showAccessoryImage(Drawable image, int width, int height) {
+    public void showAccessoryImage(int imageID, int width, int height, int topMargin) {
+        Drawable image = ContextCompat.getDrawable( getContext(), imageID );
+        showAccessoryImage( image, 40, 40, topMargin );
+    }
+
+    public void showAccessoryImage(Drawable image, int width, int height, int topMargin) {
         ImageView imageView = new ImageView( getContext() );
         imageView.setScaleType( ImageView.ScaleType.CENTER_CROP );
         imageView.setImageDrawable( image );
         // Set the image size
-        imageView.setLayoutParams( new LayoutParams( width, height ) );
+        LayoutParams layoutParams = new LayoutParams( width, height );
+        layoutParams.setMargins( 0, topMargin, 0, 0 );
+        imageView.setLayoutParams( layoutParams );
         setAccessoryView( imageView );
+    }
+
+    protected void hideAccessoryView() {
+        setAccessoryView( null );
+    }
+
+    public void setAccessoryView(View view) {
+        accessoryPanel.removeAllViews();
+        ViewGroup.LayoutParams layoutParams = accessoryPanel.getLayoutParams();
+        if( view != null ) {
+            accessoryPanel.addView( view );
+            layoutParams.width = Display.dpToPx( 40 );
+        }
+        else {
+            layoutParams.width = 0;
+        }
+        accessoryPanel.setLayoutParams( layoutParams );
     }
 
     // Properties
@@ -263,9 +270,10 @@ public class FormFieldView extends FrameLayout {
 
     public void setHeight(int height) {
         this.height = height;
-        ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = Display.dpToPx( height );
-        setLayoutParams( layoutParams );
+    }
+
+    public int getConfiguredHeight() {
+        return height;
     }
 
     public void setBackgroundColor(int backgroundColor) {

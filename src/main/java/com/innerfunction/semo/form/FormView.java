@@ -19,6 +19,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -28,6 +29,7 @@ import com.innerfunction.http.Response;
 import com.innerfunction.pttn.app.AppContainer;
 import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.q.Q;
+import com.innerfunction.util.Display;
 import com.innerfunction.util.Null;
 import com.innerfunction.util.StringTemplate;
 
@@ -172,6 +174,7 @@ public class FormView extends ScrollView {
         FormFieldView field = getFocusedField();
         field.releaseFieldFocus();
         field.setSelectedStatus( false );
+        hideKeyboard();
     }
 
     /** Move field focus to the next focusable field. */
@@ -365,6 +368,16 @@ public class FormView extends ScrollView {
             if( field instanceof LoadingIndicator ) {
                 this.loadingIndicator = (LoadingIndicator)field;
             }
+            /* Setting of field height needs to be reviewed:
+               - By default, field height should size to wrap their content;
+               - Height should only be set when specified in the config;
+            ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                Display.dpToPx( field.getConfiguredHeight() )
+            );
+            field.setLayoutParams( layoutParams );
+            */
+
             fieldLayout.addView( field );
         }
         fieldLayout.addView( footerView );

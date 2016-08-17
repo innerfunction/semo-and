@@ -23,7 +23,7 @@ public class FormHiddenFieldView extends FormFieldView {
     public FormHiddenFieldView(Context context) {
         super( context );
         setIsInput( true );
-        setHeight( 0 );
+        setLayoutParams( new LayoutParams( 0, 0 ) );
         setVisibility( INVISIBLE );
     }
 

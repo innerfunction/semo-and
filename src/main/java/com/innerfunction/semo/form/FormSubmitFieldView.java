@@ -14,8 +14,9 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -30,11 +31,23 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
     public FormSubmitFieldView(Context context) {
         super( context );
         setIsSelectable( true );
-        this.loadingIndicator = new ProgressBar( context );//, null, android.R.style.Widget_ProgressBar_Small );
+        // Create loading indicator.
+        this.loadingIndicator = new ProgressBar( context );
         loadingIndicator.setIndeterminate( true );
-        loadingIndicator.setLayoutParams( new FrameLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+        // Following bit of faffing about needed to get a nice vertical centreing.
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
+        loadingIndicator.setLayoutParams( layoutParams );
         loadingIndicator.setVisibility( View.GONE );
-        labelPanel.addView( loadingIndicator );
+        FrameLayout layout = new FrameLayout( context );
+        layout.setPadding( 0, 10, 0, 0 );
+        layout.addView( loadingIndicator );
+        layoutParams = new FrameLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT );
+        layoutParams.gravity = Gravity.CENTER;
+        layout.setLayoutParams( layoutParams );
+
+        labelPanel.addView( layout );
+
+//        labelPanel.addView( loadingIndicator );
     }
 
     @Override
@@ -47,6 +60,9 @@ public class FormSubmitFieldView extends FormFieldView implements FormView.Loadi
         TextView titleLabel = getTitleLabel();
         if( loading ) {
             titleLabel.setAlpha( 0.35f );
+            ViewGroup.LayoutParams layoutParams = loadingIndicator.getLayoutParams();
+            layoutParams.height = titleLabel.getLineHeight();
+            loadingIndicator.setLayoutParams( layoutParams );
             loadingIndicator.setVisibility( View.VISIBLE );
         }
         else {
