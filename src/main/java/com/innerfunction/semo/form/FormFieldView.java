@@ -94,9 +94,9 @@ public class FormFieldView extends FrameLayout {
         this.accessoryPanel = (FrameLayout)cellLayout.findViewById( R.id.accessory_panel );
 
         this.labelPanel = makeLabelPanel( context );
-        // Adding additional padding to the bottom of the label panel improves the overall look
-        // of form layouts.
-        labelPanel.setPadding( 0, 0, 0, padding );
+        // Adding additional padding to the bottom and right  of the label panel improves the
+        // overall look of form layouts.
+        labelPanel.setPadding( 0, 0, padding, padding );
         this.valueLabel.setVisibility( INVISIBLE );
         setMainView( labelPanel );
 
@@ -195,7 +195,7 @@ public class FormFieldView extends FrameLayout {
 
     public void showAccessoryImage(int imageID, int width, int height, int topMargin) {
         Drawable image = ContextCompat.getDrawable( getContext(), imageID );
-        showAccessoryImage( image, 40, 40, topMargin );
+        showAccessoryImage( image, width, height, topMargin );
     }
 
     public void showAccessoryImage(Drawable image, int width, int height, int topMargin) {
