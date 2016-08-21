@@ -14,11 +14,14 @@
 package com.innerfunction.semo.form;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
 import com.innerfunction.pttn.IOCContainerAware;
+import com.innerfunction.pttn.app.TitleBarButton;
 import com.innerfunction.pttn.app.ViewController;
 import com.innerfunction.pttn.ui.table.TableViewController;
 import com.innerfunction.util.KeyPath;
@@ -178,6 +181,9 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
         itemsListView.setContent( items );
         itemsListView.afterIOCConfigure( configuration );
         itemsListView.setSelectedIndex( selectedIndex );
+        Drawable dismissIcon = ContextCompat.getDrawable( getContext(), android.R.drawable.ic_menu_close_clear_cancel );
+        TitleBarButton dismissButton = new TitleBarButton("Cancel", dismissIcon, "dismiss-modal");
+        itemsListView.setRightTitleBarButton( dismissButton );
 
         // Present the select list in a modal.
         ViewController viewController = getForm().getViewController();
