@@ -169,6 +169,9 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
                 if( indexPath.getRow() == selectedIndex ) {
                     cell.setAccessoryType( ATableViewCellAccessoryView.ATableViewCellAccessoryType.Checkmark );
                 }
+                else {
+                    cell.setAccessoryType( ATableViewCellAccessoryView.ATableViewCellAccessoryType.None );
+                }
                 return cell;
             }
         };
