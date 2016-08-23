@@ -114,7 +114,7 @@ public class FormTextFieldView extends FormFieldView {
     }
 
     public void setIsPassword(boolean isPassword) {
-        this.isPassword = false;//isPassword;
+        this.isPassword = isPassword;
         if( isPassword ) {
             input.setTransformationMethod( PasswordTransformationMethod.getInstance() );
         }

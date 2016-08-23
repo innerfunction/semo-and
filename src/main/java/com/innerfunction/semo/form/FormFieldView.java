@@ -113,7 +113,7 @@ public class FormFieldView extends FrameLayout {
         labelPanel.setLayoutParams( new LayoutParams( ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT ) );
         labelPanel.setBackgroundColor( Color.TRANSPARENT );
 
-        int textSize = Display.ptToPx( 12.0f );
+        int textSize = Display.ptToSp( 12.0f );
 
         this.titleLabel = new TextView( context );
         RelativeLayout.LayoutParams relParams = new RelativeLayout.LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT );
