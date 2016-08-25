@@ -114,8 +114,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
 
     @Override
     public void setValue(Object value) {
-        super.setValue( value );
-        selectedItem = null;
+        selectedItem = nullItem;
         if( value != null ) {
             for( Map<String, Object> item : items ) {
                 if( value.equals( item.get("value") ) ) {
@@ -124,7 +123,7 @@ public class FormSelectFieldView extends FormTextFieldView implements IOCContain
                 }
             }
         }
-        else selectedItem = nullItem;
+        super.setValue( value );
     }
 
     @Override

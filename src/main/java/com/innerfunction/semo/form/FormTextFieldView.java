@@ -227,6 +227,9 @@ public class FormTextFieldView extends FormFieldView {
                     public void onAnimationEnd(Animator animation) {
                         // Focus input and show keyboard after transition.
                         input.requestFocus();
+                        String value = (String)getValue();
+                        input.setText( value );
+                        input.setSelection( value.length() ); // Place cursor at end of value.
                         InputMethodManager keyboard
                             = (InputMethodManager)getContext().getSystemService( Context.INPUT_METHOD_SERVICE );
                         keyboard.showSoftInput( input, InputMethodManager.SHOW_IMPLICIT );

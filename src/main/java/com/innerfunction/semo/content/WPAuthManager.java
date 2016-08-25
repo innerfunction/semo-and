@@ -195,6 +195,7 @@ public class WPAuthManager implements AuthenticationDelegate {
         container.showLoginForm();
     }
 
+    @Override
     public boolean isAuthenticationErrorResponse(Client client, Response response) {
         String requestURL = response.getRequestURL();
         // Note that authentication failures returned by login don't count as authentication errors
@@ -202,8 +203,9 @@ public class WPAuthManager implements AuthenticationDelegate {
         return response.getStatusCode() == 401 && !requestURL.equals( getLoginURL() );
     }
 
+    @Override
     public Q.Promise<Response> authenticateUsingHTTPClient(Client client) {
-        final Q.Promise<Response> promise = new Q.Promise<Response>();
+        final Q.Promise<Response> promise = new Q.Promise<>();
         // Read username and password from local storage and keychain.
         String username = userDefaults.getString( getWPRealmKey("user_login") );
         String password = userDefaults.getString( getWPRealmKey("user_pass") );
@@ -218,7 +220,7 @@ public class WPAuthManager implements AuthenticationDelegate {
                     .then( new Q.Promise.Callback<Response, Response>() {
                         public Response result(Response response) {
                             int statusCode = response.getStatusCode();
-                            if( statusCode == 201 ) {
+                            if( statusCode == 200 || statusCode == 201 ) {
                                 promise.resolve( response );
                             }
                             else {
@@ -242,7 +244,7 @@ public class WPAuthManager implements AuthenticationDelegate {
         }
         else {
             handleAuthenticationFailure();
-            promise.reject("Reauthentication failure: Username and password not available");
+            promise.reject("Authentication failure: Username and password not available");
         }
         return promise;
     }

@@ -212,7 +212,7 @@ public class WPContentContainerFormFactory extends IOCObjectFactoryBase<FormView
                     Map<String,Object> profile = (Map<String,Object>)data.get("profile");
                     // Update stored user info.
                     authManager.storeUserProfile( profile );
-                    String action = String.format("post:toast+message=%@", Uri.encode("Account updated") );
+                    String action = String.format("post:toast+message=%s", Uri.encode("Account updated") );
                     appContainer.postMessage( action, form );
                 }
                 @Override
