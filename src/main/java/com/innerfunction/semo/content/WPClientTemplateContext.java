@@ -190,6 +190,7 @@ public class WPClientTemplateContext implements IOCContainerAware {
             String location = KeyPath.getValueAsString("location", attachment );
             String filename = KeyPath.getValueAsString("filename", attachment );
             String url = KeyPath.getValueAsString("url", attachment );
+            boolean cacheResult = true;
             if( "packaged".equals( location ) ) {
                 String path = Paths.join( packagedContentPath, filename );
                 url = String.format("file://%s", path );
@@ -208,12 +209,16 @@ public class WPClientTemplateContext implements IOCContainerAware {
                     // webview was able to download the file then the protocol should be able to
                     // load from the cache.
                     container.getContentAndWriteToFile( url, filename );
+                    // Don't cache the result, want the download to become available.
+                    cacheResult = false;
                 }
             }
             // Else location == 'server' or other. Use the attachment URL to download from server.
 
             // Cache the result before returning.
-            cache.put( key, url );
+            if( cacheResult ) {
+                cache.put( key, url );
+            }
 
             return url;
         }

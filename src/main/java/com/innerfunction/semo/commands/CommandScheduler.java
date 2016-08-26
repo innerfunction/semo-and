@@ -397,7 +397,7 @@ public class CommandScheduler implements Service {
                 CommandItem command = new CommandItem();
                 command.name = parts[0];
                 if( parts.length > 1 ) {
-                    parts = Arrays.copyOfRange( parts, 1, parts.length - 1 );
+                    parts = Arrays.copyOfRange( parts, 1, parts.length );
                     command.args = Arrays.asList( parts );
                 }
                 else {

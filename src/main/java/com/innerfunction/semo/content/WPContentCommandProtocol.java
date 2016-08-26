@@ -296,7 +296,7 @@ public class WPContentCommandProtocol extends CommandProtocol {
                 }
             }
             Date endTime = new Date();
-            Log.d( Tag, String.format("Content deploy took %d s", (endTime.getTime() - startTime.getTime()) / 1000 ) );
+            Log.d( Tag, String.format("Update of %d items took %d s", feedItems.size(), (endTime.getTime() - startTime.getTime()) / 1000 ) );
         }
         finally {
             postDB.commitTransaction();
