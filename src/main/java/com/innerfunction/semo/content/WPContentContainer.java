@@ -21,6 +21,7 @@ import android.util.Log;
 import com.innerfunction.http.Client;
 import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
+import com.innerfunction.pttn.IOCConfigurationAware;
 import com.innerfunction.pttn.IOCContainerAware;
 import com.innerfunction.pttn.Message;
 import com.innerfunction.pttn.MessageReceiver;
@@ -54,7 +55,7 @@ import java.util.Map;
  *
  * Attached by juliangoacher on 29/05/16.
  */
-public class WPContentContainer extends Container implements IOCContainerAware, MessageReceiver {
+public class WPContentContainer extends Container implements IOCContainerAware, IOCConfigurationAware, MessageReceiver {
 
     static final String Tag = WPContentContainer.class.getSimpleName();
 
@@ -521,6 +522,8 @@ public class WPContentContainer extends Container implements IOCContainerAware, 
     public void setIOCContainer(Container container) {
         this.iocContainer = container;
     }
+
+    // IOCConfigurationAware
 
     /** Called immediately before the object is configured by calls to its properties. */
     @Override

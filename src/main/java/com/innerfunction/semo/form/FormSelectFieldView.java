@@ -20,6 +20,7 @@ import android.util.Log;
 
 import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
+import com.innerfunction.pttn.IOCConfigurationAware;
 import com.innerfunction.pttn.IOCContainerAware;
 import com.innerfunction.pttn.app.TitleBarButton;
 import com.innerfunction.pttn.app.ViewController;
@@ -40,7 +41,7 @@ import static com.innerfunction.util.DataLiterals.*;
 /**
  * Created by juliangoacher on 28/07/16.
  */
-public class FormSelectFieldView extends FormTextFieldView implements IOCContainerAware {
+public class FormSelectFieldView extends FormTextFieldView implements IOCContainerAware, IOCConfigurationAware {
 
     static final String Tag = FormSelectFieldView.class.getSimpleName();
 

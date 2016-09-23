@@ -15,6 +15,7 @@ package com.innerfunction.semo.content;
 
 import com.innerfunction.pttn.Configuration;
 import com.innerfunction.pttn.Container;
+import com.innerfunction.pttn.IOCConfigurationAware;
 import com.innerfunction.pttn.IOCContainerAware;
 import com.innerfunction.semo.db.DB;
 import com.innerfunction.util.KeyPath;
@@ -39,7 +40,7 @@ import java.util.Set;
  *
  * Attached by juliangoacher on 07/07/16.
  */
-public class WPClientTemplateContext implements IOCContainerAware {
+public class WPClientTemplateContext implements IOCContainerAware, IOCConfigurationAware {
 
     private WPContentContainer contentContainer;
     private AttachmentsProxy attachmentsProxy;
