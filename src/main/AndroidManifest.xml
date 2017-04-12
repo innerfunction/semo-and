@@ -11,11 +11,6 @@
         android:supportsRtl="true"
         >
 
-        <provider
-            android:authorities="com.innerfunction.semo.testcontents"
-            android:name="com.innerfunction.semo.provider.TestContentsProvider">
-        </provider>
-
     </application>
 
 </manifest>
