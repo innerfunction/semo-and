@@ -84,7 +84,7 @@ public class GetURLCommand implements Command {
         this.commandName = name;
         this.promise = new Q.Promise<>();
 
-        if( args.size() > 1 ) {
+        if( args != null && args.size() > 1 ) {
 
             this.url = args.get( 0 ).toString();
             this.filename = args.get( 1 ).toString();

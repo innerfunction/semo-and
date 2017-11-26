@@ -221,10 +221,10 @@ public class WPContentCommandProtocol extends CommandProtocol {
                 String downloadURL = String.format("%s?page=%d&since=%s", refreshURL, page, since );
 
                 // Construct get command with url and file name to write result to, with 3 retries.
-                CommandItem getCmd = new CommandItem("get", downloadURL, pageFile, 2 );
+                CommandItem getCmd = new CommandItem("get", downloadURL, pageFile.getAbsolutePath(), 2 );
                 // Construct process command to continue downloading the feed.
                 CommandItem continueCmd
-                    = new CommandItem( getQualifiedCommandName("continue-download"), refreshURL, pageFile );
+                    = new CommandItem( getQualifiedCommandName("continue-download"), refreshURL, pageFile.getAbsolutePath() );
 
                 commands = Arrays.asList( rmPageFileCmd, getCmd, continueCmd );
             }
